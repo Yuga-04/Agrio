@@ -15,6 +15,10 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
   bool _isFocused = false;
   bool _hasText = false;
 
+  // FIX: Language comes from LanguageSupportScreen as a plain Map<String,String>
+  // (i.e. the args object itself IS the language map, not nested under a key).
+  Map<String, String>? _language;
+
   late AnimationController _slideController;
   late AnimationController _fadeController;
   late AnimationController _buttonController;
@@ -44,12 +48,10 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
         );
-
     _fadeAnimation = Tween<double>(
       begin: 0,
       end: 1,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
-
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
     );
@@ -62,6 +64,29 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
         _hasText = _phoneController.text.length == 10;
       });
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    // LanguageSupportScreen passes the language map DIRECTLY as arguments.
+    // So args itself is the Map<String,String> with keys: code, name, native.
+    if (args is Map) {
+      // Check it looks like a language map (has 'code' key), not a phone+language map.
+      if (args.containsKey('code')) {
+        _language = args.map((k, v) => MapEntry(k.toString(), v.toString()));
+      } else if (args.containsKey('language')) {
+        // Fallback: handle if called from OTP back-nav with wrapped args.
+        final langRaw = args['language'];
+        if (langRaw is Map) {
+          _language = langRaw.map(
+            (k, v) => MapEntry(k.toString(), v.toString()),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -93,7 +118,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                   fit: BoxFit.cover,
                   alignment: const Alignment(0, -0.2),
                 ),
-
                 // Bottom gradient fade into white
                 Positioned(
                   bottom: 0,
@@ -110,7 +134,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                     ),
                   ),
                 ),
-
                 // Back button
                 Positioned(
                   top: 48,
@@ -152,8 +175,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 50),
-
-                      // Header
                       const Text(
                         'Enter your\nmobile number',
                         style: TextStyle(
@@ -357,7 +378,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
 
                       const SizedBox(height: 20),
 
-                      // GET OTP Button
+                      // GET OTP — passes {phone, language} map to OTPScreen
                       GestureDetector(
                         onTapDown: (_) => _buttonController.forward(),
                         onTapUp: (_) => _buttonController.reverse(),
@@ -366,7 +387,10 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                             ? () => Navigator.pushNamed(
                                 context,
                                 '/otp',
-                                arguments: '+91 ${_phoneController.text}',
+                                arguments: {
+                                  'phone': '+91 ${_phoneController.text}',
+                                  'language': _language,
+                                },
                               )
                             : null,
                         child: ScaleTransition(
