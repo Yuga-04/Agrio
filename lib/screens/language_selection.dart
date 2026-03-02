@@ -67,7 +67,7 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
 
   @override
   Widget build(BuildContext context) {
-    final topPadding = MediaQuery.of(context).padding.top;
+    // final topPadding = MediaQuery.of(context).padding.top;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
@@ -97,38 +97,7 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                       ),
                     ),
                   ),
-                  // Positioned(
-                  //   top: topPadding + 12,
-                  //   right: 20,
-                  //   child: FadeTransition(
-                  //     opacity: _fadeAnimation,
-                  //     child: Container(
-                  //       padding: const EdgeInsets.symmetric(
-                  //           horizontal: 12, vertical: 6),
-                  //       decoration: BoxDecoration(
-                  //         color: Colors.white.withOpacity(0.9),
-                  //         borderRadius: BorderRadius.circular(20),
-                  //       ),
-                  //       child: Row(
-                  //         mainAxisSize: MainAxisSize.min,
-                  //         children: const [
-                  //           Icon(Icons.language_rounded,
-                  //               size: 14, color: Color(0xFF2E7D32)),
-                  //           SizedBox(width: 5),
-                  //           Text(
-                  //             'Choose Language',
-                  //             style: TextStyle(
-                  //               fontSize: 12,
-                  //               fontWeight: FontWeight.w600,
-                  //               color: Color(0xFF2E7D32),
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-             
+          
                   Positioned(
                     bottom: 0,
                     left: 0,
