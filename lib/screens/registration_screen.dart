@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String phoneNumber;
-  // const RegistrationScreen({super.key, this.phoneNumber = '+91 98765 43210'});
   const RegistrationScreen({super.key, this.phoneNumber = ''});
+
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
 }
@@ -15,6 +14,9 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   String? _selectedDistrict;
   String? _selectedBlock;
   String? _selectedVillage;
+
+  Map<String, String>? _language;
+  String _phoneNumber = '';
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -33,7 +35,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     'Thoothukudi',
     'Dindigul',
   ];
-
   final List<String> _blocks = [
     'Block 1',
     'Block 2',
@@ -41,7 +42,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     'Block 4',
     'Block 5',
   ];
-
   final List<String> _villages = [
     'Village A',
     'Village B',
@@ -73,7 +73,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
         );
-
     _fadeAnimation = Tween<double>(
       begin: 0,
       end: 1,
@@ -83,6 +82,19 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     _fadeController.forward();
 
     _nameController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map) {
+      _phoneNumber = (args['phone'] as String?) ?? widget.phoneNumber;
+      final langRaw = args['language'];
+      if (langRaw is Map) {
+        _language = langRaw.map((k, v) => MapEntry(k.toString(), v.toString()));
+      }
+    }
   }
 
   @override
@@ -96,9 +108,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final String phoneNumber = widget.phoneNumber.isNotEmpty
-        ? widget.phoneNumber
-        : (ModalRoute.of(context)?.settings.arguments as String? ?? '');
+    final String langLabel =
+        _language?['native'] ?? _language?['name'] ?? 'Language';
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -116,7 +127,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                   fit: BoxFit.cover,
                   alignment: const Alignment(0, -0.2),
                 ),
-                // Gradient fade
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -132,7 +142,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     ),
                   ),
                 ),
-                // Back button
                 Positioned(
                   top: 48,
                   left: 16,
@@ -141,7 +150,10 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                       Navigator.pushReplacementNamed(
                         context,
                         '/otp',
-                        arguments: phoneNumber,
+                        arguments: {
+                          'phone': _phoneNumber,
+                          'language': _language,
+                        },
                       );
                     },
                     child: Container(
@@ -158,7 +170,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     ),
                   ),
                 ),
-                // Language toggle
                 Positioned(
                   top: 48,
                   right: 16,
@@ -171,17 +182,17 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                       color: Colors.white.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.language,
                           size: 16,
                           color: Color(0xFF2E7D32),
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
-                          'தமிழ்',
-                          style: TextStyle(
+                          langLabel,
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF2E7D32),
@@ -191,12 +202,11 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     ),
                   ),
                 ),
-                // App title
                 Positioned(
                   bottom: size.height * 0.07,
                   left: 24,
                   child: const Text(
-                    'Uzhavar',
+                    'Agrio',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w800,
@@ -229,7 +239,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header
                         Row(
                           children: [
                             const Text(
@@ -284,7 +293,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
 
                         const SizedBox(height: 20),
 
-                        // Name field
                         _buildLabel('Full Name'),
                         const SizedBox(height: 6),
                         _buildTextField(
@@ -295,7 +303,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
 
                         const SizedBox(height: 14),
 
-                        // Mobile (pre-filled, disabled)
                         _buildLabel('Mobile Number'),
                         const SizedBox(height: 6),
                         Container(
@@ -320,7 +327,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                phoneNumber, // ← was widget.phoneNumber
+                                _phoneNumber,
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -340,7 +347,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
 
                         const SizedBox(height: 14),
 
-                        // District
                         _buildLabel('District'),
                         const SizedBox(height: 6),
                         _buildDropdown(
@@ -354,7 +360,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
 
                         const SizedBox(height: 14),
 
-                        // Block
                         _buildLabel('Block'),
                         const SizedBox(height: 6),
                         _buildDropdown(
@@ -370,7 +375,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
 
                         const SizedBox(height: 14),
 
-                        // Village
                         _buildLabel('Village'),
                         const SizedBox(height: 6),
                         _buildDropdown(
@@ -386,7 +390,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
 
                         const SizedBox(height: 24),
 
-                        // Submit button
                         GestureDetector(
                           onTap: _isFormValid
                               ? () => Navigator.pushNamed(context, '/menu')
@@ -482,6 +485,10 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     );
   }
 
+  // FIX: Replace DropdownButtonFormField with a custom Row-based dropdown.
+  // DropdownButtonFormField's internal layout cannot reliably align prefixIcon
+  // with hint text — the icon drifts to the bottom while hint floats to the top.
+  // Building it manually with a Row gives us full control over vertical alignment.
   Widget _buildDropdown({
     required String hint,
     required IconData icon,
@@ -490,62 +497,105 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     required ValueChanged<String?>? onChanged,
     bool disabled = false,
   }) {
+    final Color iconColor = disabled
+        ? const Color(0xFFCCCCCC)
+        : const Color(0xFF888888);
+    final Color hintColor = disabled
+        ? const Color(0xFFCCCCCC)
+        : const Color(0xFFBBBBBB);
+    final Color bgColor = disabled
+        ? const Color(0xFFF0F0F0)
+        : const Color(0xFFF7F7F7);
+    final Color borderColor = value != null
+        ? const Color(0xFF2E7D32).withOpacity(0.5)
+        : Colors.transparent;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
+      height: 52,
       decoration: BoxDecoration(
-        color: disabled ? const Color(0xFFF0F0F0) : const Color(0xFFF7F7F7),
+        color: bgColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: value != null
-              ? const Color(0xFF2E7D32).withOpacity(0.5)
-              : Colors.transparent,
-          width: 1.5,
-        ),
+        border: Border.all(color: borderColor, width: 1.5),
       ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          prefixIcon: Icon(
-            icon,
-            size: 18,
-            color: disabled ? const Color(0xFFCCCCCC) : const Color(0xFF888888),
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 4,
+      child: Theme(
+        // Remove the default underline that DropdownButton adds
+        data: Theme.of(context).copyWith(
+          inputDecorationTheme: const InputDecorationTheme(
+            border: InputBorder.none,
           ),
         ),
-        hint: Text(
-          hint,
-          style: TextStyle(
-            color: disabled ? const Color(0xFFCCCCCC) : const Color(0xFFBBBBBB),
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-        ),
-        icon: Icon(
-          Icons.keyboard_arrow_down_rounded,
-          color: disabled ? const Color(0xFFCCCCCC) : const Color(0xFF888888),
-        ),
-        dropdownColor: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        items: items
-            .map(
-              (item) => DropdownMenuItem(
-                value: item,
-                child: Text(
-                  item,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF1A1A1A),
-                    fontWeight: FontWeight.w500,
-                  ),
+        child: DropdownButtonHideUnderline(
+          child: ButtonTheme(
+            alignedDropdown: true,
+            child: DropdownButton<String>(
+              value: value,
+              isExpanded: true,
+              icon: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: iconColor,
+                  size: 22,
                 ),
               ),
-            )
-            .toList(),
+              onChanged: disabled ? null : onChanged,
+              dropdownColor: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              // ── Custom hint built as a Row so icon + text stay centered ──
+              hint: Row(
+                children: [
+                  const SizedBox(width: 12),
+                  Icon(icon, size: 18, color: iconColor),
+                  const SizedBox(width: 10),
+                  Text(
+                    hint,
+                    style: TextStyle(
+                      color: hintColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              // ── Selected value row ──
+              selectedItemBuilder: value == null
+                  ? null
+                  : (context) => items.map((item) {
+                      return Row(
+                        children: [
+                          const SizedBox(width: 12),
+                          Icon(icon, size: 18, color: const Color(0xFF2E7D32)),
+                          const SizedBox(width: 10),
+                          Text(
+                            item,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+              items: items
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item,
+                      child: Text(
+                        item,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF1A1A1A),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ),
       ),
     );
   }

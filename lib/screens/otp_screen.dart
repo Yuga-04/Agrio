@@ -4,7 +4,7 @@ import 'dart:async';
 
 class OTPScreen extends StatefulWidget {
   final String phoneNumber;
-  const OTPScreen({super.key, this.phoneNumber = '+91*******10'});
+  const OTPScreen({super.key, this.phoneNumber = ''});
 
   @override
   State<OTPScreen> createState() => _OTPScreenState();
@@ -21,6 +21,10 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   bool _canResend = false;
   bool _isComplete = false;
   Timer? _timer;
+
+  // Parsed from route arguments — both set via didChangeDependencies
+  String _phoneNumber = '';
+  Map<String, String>? _language;
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -51,12 +55,10 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
         );
-
     _fadeAnimation = Tween<double>(
       begin: 0,
       end: 1,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
-
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
     );
@@ -67,6 +69,19 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
 
     for (int i = 0; i < 4; i++) {
       _controllers[i].addListener(() => _checkComplete());
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map) {
+      _phoneNumber = (args['phone'] as String?) ?? widget.phoneNumber;
+      final langRaw = args['language'];
+      if (langRaw is Map) {
+        _language = langRaw.map((k, v) => MapEntry(k.toString(), v.toString()));
+      }
     }
   }
 
@@ -113,10 +128,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final String phoneNumber = widget.phoneNumber.isNotEmpty
-        ? widget.phoneNumber
-        : (ModalRoute.of(context)?.settings.arguments as String? ??
-              '+91XXXXXXXXXX');
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -134,7 +145,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                   fit: BoxFit.cover,
                   alignment: const Alignment(0, -0.2),
                 ),
-                // Bottom gradient fade into white
                 Positioned(
                   bottom: 0,
                   left: 0,
@@ -150,14 +160,20 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
-
-                // Back button
+                // Back button — passes {phone, language} back to PhoneEntryScreen
                 Positioned(
                   top: 48,
                   left: 16,
                   child: GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, '/phone');
+                      Navigator.pushReplacementNamed(
+                        context,
+                        '/phone',
+                        arguments: {
+                          'phone': _phoneNumber,
+                          'language': _language,
+                        },
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),
@@ -191,8 +207,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 50),
-                      // Header
+                      const SizedBox(height: 50),
                       const Text(
                         'Enter OTP',
                         style: TextStyle(
@@ -213,7 +228,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                           children: [
                             const TextSpan(text: 'We sent a 4-digit code to '),
                             TextSpan(
-                              text: phoneNumber, // ← was widget.phoneNumber
+                              text: _phoneNumber,
                               style: const TextStyle(
                                 color: Color(0xFF1A1A1A),
                                 fontWeight: FontWeight.w600,
@@ -279,7 +294,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
 
                       const SizedBox(height: 20),
 
-                      // VERIFY Button
+                      // VERIFY — passes {phone, language} to RegistrationScreen
                       GestureDetector(
                         onTapDown: (_) => _buttonController.forward(),
                         onTapUp: (_) => _buttonController.reverse(),
@@ -288,7 +303,10 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                             ? () => Navigator.pushNamed(
                                 context,
                                 '/registration',
-                                arguments: phoneNumber, // ← pass it forward
+                                arguments: {
+                                  'phone': _phoneNumber,
+                                  'language': _language,
+                                },
                               )
                             : null,
                         child: ScaleTransition(
@@ -374,10 +392,10 @@ class _OTPBoxState extends State<_OTPBox> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: _isFocused
-              ? const Color(0xFF2E7D32) // green when typing
+              ? const Color(0xFF2E7D32)
               : filled
-              ? const Color(0xFF2E7D32) // green when filled
-              : const Color(0xFFDDDDDD), // grey border when empty
+              ? const Color(0xFF2E7D32)
+              : const Color(0xFFDDDDDD),
           width: _isFocused ? 2.0 : 1.5,
         ),
       ),
@@ -387,16 +405,19 @@ class _OTPBoxState extends State<_OTPBox> {
         maxLength: 1,
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         style: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w700,
           color: Color(0xFF1A1A1A),
+          height: 2.0,
         ),
         decoration: const InputDecoration(
           counterText: '',
           border: InputBorder.none,
           contentPadding: EdgeInsets.zero,
+          isDense: true,
         ),
         onChanged: widget.onChanged,
       ),

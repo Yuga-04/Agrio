@@ -46,9 +46,10 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
         );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
     );
@@ -65,9 +66,13 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
     super.dispose();
   }
 
+  /// Returns the full language map for the currently selected language code.
+  Map<String, String>? get _selectedLangMap => _selectedLanguage == null
+      ? null
+      : _languages.firstWhere((l) => l['code'] == _selectedLanguage);
+
   @override
   Widget build(BuildContext context) {
-    // final topPadding = MediaQuery.of(context).padding.top;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
@@ -97,7 +102,6 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                       ),
                     ),
                   ),
-          
                   Positioned(
                     bottom: 0,
                     left: 0,
@@ -134,8 +138,9 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min, // ✅ shrink-wrap content
+                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      const SizedBox(height: 50),
                       const Text(
                         'Select your language',
                         style: TextStyle(
@@ -155,7 +160,7 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                           fontWeight: FontWeight.w400,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 25),
 
                       // Language tiles
                       IntrinsicHeight(
@@ -169,14 +174,14 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                             return Expanded(
                               child: Padding(
                                 padding: EdgeInsets.only(
-                                    right: index < _languages.length - 1
-                                        ? 10
-                                        : 0),
+                                  right: index < _languages.length - 1 ? 10 : 0,
+                                ),
                                 child: _LanguageTile(
                                   language: lang,
                                   isSelected: isSelected,
                                   onTap: () => setState(
-                                      () => _selectedLanguage = lang['code']),
+                                    () => _selectedLanguage = lang['code'],
+                                  ),
                                 ),
                               ),
                             );
@@ -184,16 +189,21 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                         ),
                       ),
 
-                      // ✅ Fixed tight gap — no Spacer pushing button far away
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 50),
 
-                      // CONTINUE Button
+                      // CONTINUE — passes language map directly as arguments.
+                      // PhoneEntryScreen receives it as: args is Map
                       GestureDetector(
                         onTapDown: (_) => _buttonController.forward(),
                         onTapUp: (_) => _buttonController.reverse(),
                         onTapCancel: () => _buttonController.reverse(),
                         onTap: _selectedLanguage != null
-                            ? () => Navigator.pushNamed(context, '/phone')
+                            ? () => Navigator.pushNamed(
+                                context,
+                                '/phone',
+                                arguments:
+                                    _selectedLangMap, // Map<String,String>
+                              )
                             : null,
                         child: ScaleTransition(
                           scale: _buttonScaleAnimation,

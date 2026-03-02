@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '/screens/language_selection.dart';
-import '/screens/phone_entry.dart';
-import '/screens/otp_verification.dart';
-import '/screens/registration.dart';
-import '/screens/menu.dart';
+import 'screens/language_support_screen.dart';
+import 'screens/phone_entry_screen.dart';
+import 'screens/otp_screen.dart';
+import 'screens/registration_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,21 +14,61 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Agrio',
-      theme: ThemeData(primarySwatch: Colors.green),
+      title: 'Uzhavar',
+      debugShowCheckedModeBanner: false,
       initialRoute: '/language',
-      routes: {
-        '/language': (context) => const LanguageSupportScreen(),
-        '/phone': (context) => const PhoneEntryScreen(),
-        '/otp': (context) => OTPScreen(
-          phoneNumber:
-              ModalRoute.of(context)?.settings.arguments as String? ?? '',
-        ),
-        '/registration': (context) => RegistrationScreen(
-          phoneNumber:
-              ModalRoute.of(context)?.settings.arguments as String? ?? '',
-        ),
-        '/menu': (context) => const MenuScreen(),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/language':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const LanguageSupportScreen(),
+            );
+
+          // FIX: PhoneEntryScreen accepts two possible arg shapes:
+          //   1. Map<String,String> with key 'code' → language map passed directly
+          //      from LanguageSupportScreen (forward navigation).
+          //   2. Map with keys 'phone' and 'language' → wrapped map passed from
+          //      OTPScreen (back navigation).
+          // PhoneEntryScreen.didChangeDependencies() handles both cases.
+          case '/phone':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const PhoneEntryScreen(),
+            );
+
+          case '/otp':
+            final args = settings.arguments;
+            String phone = '';
+            if (args is Map) {
+              phone = (args['phone'] as String?) ?? '';
+            } else if (args is String) {
+              phone = args;
+            }
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => OTPScreen(phoneNumber: phone),
+            );
+
+          case '/registration':
+            final args = settings.arguments;
+            String phone = '';
+            if (args is Map) {
+              phone = (args['phone'] as String?) ?? '';
+            } else if (args is String) {
+              phone = args;
+            }
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => RegistrationScreen(phoneNumber: phone),
+            );
+
+          default:
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const LanguageSupportScreen(),
+            );
+        }
       },
     );
   }
