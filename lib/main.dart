@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.green),
       initialRoute: '/language',
       routes: {
-        '/language': (context) => const LanguageSelectionScreen(),
+        '/language': (context) => const LanguageSupportScreen(),
         '/phone': (context) => const PhoneEntryScreen(),
         '/otp': (context) => OTPScreen(
           phoneNumber:
