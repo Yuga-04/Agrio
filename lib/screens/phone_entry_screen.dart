@@ -174,7 +174,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 50),
+                      const SizedBox(height: 20),
                       const Text(
                         'Enter your\nmobile number',
                         style: TextStyle(
