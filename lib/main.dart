@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/language',
       routes: {
-        '/language': (context) => const LanguageSelectionScreen(),
+        '/language': (context) => const LanguageSupportScreen(),
         '/phone': (context) => const PhoneEntryScreen(),
         '/otp': (context) => const OTPScreen(),
         '/registration': (context) => const RegistrationScreen(),
