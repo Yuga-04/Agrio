@@ -1,76 +1,404 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
 
-class OTPScreen extends StatelessWidget {
-  const OTPScreen({super.key});
+class OTPScreen extends StatefulWidget {
+  final String phoneNumber;
+  const OTPScreen({super.key, this.phoneNumber = '+91*******10'});
+
+  @override
+  State<OTPScreen> createState() => _OTPScreenState();
+}
+
+class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
+  final List<TextEditingController> _controllers = List.generate(
+    4,
+    (_) => TextEditingController(),
+  );
+  final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
+
+  int _resendSeconds = 30;
+  bool _canResend = false;
+  bool _isComplete = false;
+  Timer? _timer;
+
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late AnimationController _buttonController;
+
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _buttonScaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _buttonController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
+    _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
+    );
+
+    _slideController.forward();
+    _fadeController.forward();
+    _startTimer();
+
+    for (int i = 0; i < 4; i++) {
+      _controllers[i].addListener(() => _checkComplete());
+    }
+  }
+
+  void _startTimer() {
+    _resendSeconds = 30;
+    _canResend = false;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendSeconds == 0) {
+        setState(() => _canResend = true);
+        timer.cancel();
+      } else {
+        setState(() => _resendSeconds--);
+      }
+    });
+  }
+
+  void _checkComplete() {
+    final complete = _controllers.every((c) => c.text.isNotEmpty);
+    if (complete != _isComplete) {
+      setState(() => _isComplete = complete);
+    }
+  }
+
+  void _onOtpChanged(int index, String value) {
+    if (value.length == 1 && index < 3) {
+      _focusNodes[index + 1].requestFocus();
+    } else if (value.isEmpty && index > 0) {
+      _focusNodes[index - 1].requestFocus();
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _slideController.dispose();
+    _fadeController.dispose();
+    _buttonController.dispose();
+    for (var c in _controllers) c.dispose();
+    for (var f in _focusNodes) f.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final String phoneNumber = widget.phoneNumber.isNotEmpty
+        ? widget.phoneNumber
+        : (ModalRoute.of(context)?.settings.arguments as String? ??
+              '+91XXXXXXXXXX');
+
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          Image.asset(
-            'assets/farmer_spraying.png',
-            fit: BoxFit.cover,
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'We have sent a 4 digit OTP to +91*******10',
-                    style: TextStyle(fontSize: 18),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(
-                      4,
-                      (index) => const SizedBox(
-                        width: 50,
-                        child: TextField(
-                          maxLength: 1,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          decoration: InputDecoration(
-                            counterText: '',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
+          // ── Image section (60% of screen) ──
+          SizedBox(
+            height: size.height * 0.60,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  'assets/farmer_spraying.png',
+                  fit: BoxFit.cover,
+                  alignment: const Alignment(0, -0.2),
+                ),
+                // Bottom gradient fade into white
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: size.height * 0.15,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.white],
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text('Resend OTP in 29'),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // Mock resend
-                        },
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                        child: const Text('Resend'),
+                ),
+
+                // Back button
+                Positioned(
+                  top: 48,
+                  left: 16,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/phone');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        shape: BoxShape.circle,
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/registration');
-                        },
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                        child: const Text('NEXT'),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 18,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // ── White card section ──
+          Expanded(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.white,
+                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 50),
+                      // Header
+                      const Text(
+                        'Enter OTP',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                          height: 1.25,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF888888),
+                          ),
+                          children: [
+                            const TextSpan(text: 'We sent a 4-digit code to '),
+                            TextSpan(
+                              text: phoneNumber, // ← was widget.phoneNumber
+                              style: const TextStyle(
+                                color: Color(0xFF1A1A1A),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // OTP boxes
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(4, (index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: _OTPBox(
+                              controller: _controllers[index],
+                              focusNode: _focusNodes[index],
+                              onChanged: (val) => _onOtpChanged(index, val),
+                            ),
+                          );
+                        }),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Resend row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            child: _canResend
+                                ? GestureDetector(
+                                    key: const ValueKey('resend'),
+                                    onTap: () {
+                                      for (var c in _controllers) c.clear();
+                                      _focusNodes[0].requestFocus();
+                                      _startTimer();
+                                    },
+                                    child: const Text(
+                                      'Resend OTP',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF2E7D32),
+                                        fontWeight: FontWeight.w600,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  )
+                                : Text(
+                                    key: const ValueKey('timer'),
+                                    'Resend OTP in ${_resendSeconds}s',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF888888),
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // VERIFY Button
+                      GestureDetector(
+                        onTapDown: (_) => _buttonController.forward(),
+                        onTapUp: (_) => _buttonController.reverse(),
+                        onTapCancel: () => _buttonController.reverse(),
+                        onTap: _isComplete
+                            ? () => Navigator.pushNamed(
+                                context,
+                                '/registration',
+                                arguments: phoneNumber, // ← pass it forward
+                              )
+                            : null,
+                        child: ScaleTransition(
+                          scale: _buttonScaleAnimation,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            width: double.infinity,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: _isComplete
+                                  ? const Color(0xFF2E7D32)
+                                  : const Color(0xFFE0E0E0),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            alignment: Alignment.center,
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 250),
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,
+                                color: _isComplete
+                                    ? Colors.white
+                                    : const Color(0xFFAAAAAA),
+                              ),
+                              child: const Text('VERIFY OTP'),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OTPBox extends StatefulWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+
+  const _OTPBox({
+    required this.controller,
+    required this.focusNode,
+    required this.onChanged,
+  });
+
+  @override
+  State<_OTPBox> createState() => _OTPBoxState();
+}
+
+class _OTPBoxState extends State<_OTPBox> {
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(() {
+      setState(() => _isFocused = widget.focusNode.hasFocus);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool filled = widget.controller.text.isNotEmpty;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 64,
+      height: 60,
+      decoration: BoxDecoration(
+        color: _isFocused
+            ? const Color(0xFFF0F7F0)
+            : filled
+            ? const Color(0xFFF0F7F0)
+            : const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: _isFocused
+              ? const Color(0xFF2E7D32) // green when typing
+              : filled
+              ? const Color(0xFF2E7D32) // green when filled
+              : const Color(0xFFDDDDDD), // grey border when empty
+          width: _isFocused ? 2.0 : 1.5,
+        ),
+      ),
+      child: TextField(
+        controller: widget.controller,
+        focusNode: widget.focusNode,
+        maxLength: 1,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        style: const TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF1A1A1A),
+        ),
+        decoration: const InputDecoration(
+          counterText: '',
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+        ),
+        onChanged: widget.onChanged,
       ),
     );
   }

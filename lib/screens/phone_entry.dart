@@ -93,6 +93,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                   fit: BoxFit.cover,
                   alignment: const Alignment(0, -0.2),
                 ),
+
                 // Bottom gradient fade into white
                 Positioned(
                   bottom: 0,
@@ -105,6 +106,29 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [Colors.transparent, Colors.white],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Back button
+                Positioned(
+                  top: 48,
+                  left: 16,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/language');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.85),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 18,
+                        color: Color(0xFF1A1A1A),
                       ),
                     ),
                   ),
@@ -127,7 +151,8 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 50),
+                      const SizedBox(height: 50),
+
                       // Header
                       const Text(
                         'Enter your\nmobile number',
@@ -338,7 +363,11 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                         onTapUp: (_) => _buttonController.reverse(),
                         onTapCancel: () => _buttonController.reverse(),
                         onTap: (_agreeToTerms && _hasText)
-                            ? () => Navigator.pushNamed(context, '/otp')
+                            ? () => Navigator.pushNamed(
+                                context,
+                                '/otp',
+                                arguments: '+91 ${_phoneController.text}',
+                              )
                             : null,
                         child: ScaleTransition(
                           scale: _buttonScaleAnimation,
