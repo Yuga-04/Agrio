@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class PhoneEntryScreen extends StatefulWidget {
   const PhoneEntryScreen({super.key});
@@ -7,93 +8,390 @@ class PhoneEntryScreen extends StatefulWidget {
   State<PhoneEntryScreen> createState() => _PhoneEntryScreenState();
 }
 
-class _PhoneEntryScreenState extends State<PhoneEntryScreen> {
-  bool _agreeToTerms = true;
+class _PhoneEntryScreenState extends State<PhoneEntryScreen>
+    with TickerProviderStateMixin {
+  bool _agreeToTerms = false;
+  final TextEditingController _phoneController = TextEditingController();
+  bool _isFocused = false;
+  bool _hasText = false;
+
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late AnimationController _buttonController;
+
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _buttonScaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _buttonController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+        );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
+    _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
+    );
+
+    _slideController.forward();
+    _fadeController.forward();
+
+    _phoneController.addListener(() {
+      setState(() {
+        _hasText = _phoneController.text.length == 10;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    _fadeController.dispose();
+    _buttonController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
+      backgroundColor: Colors.white,
+      body: Column(
         children: [
-          Image.asset(
-            'assets/farmer_with_cow.png',
-            fit: BoxFit.cover,
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Enter your mobile number',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          // ── Image section (60% of screen) ──
+          SizedBox(
+            height: size.height * 0.60,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  'assets/farmer_with_cow.png',
+                  fit: BoxFit.cover,
+                  alignment: const Alignment(0, -0.2),
+                ),
+                // Bottom gradient fade into white
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: size.height * 0.15,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Colors.white],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
+                ),
+              ],
+            ),
+          ),
+
+          // ── White card section (40% of screen) ──
+          Expanded(
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  width: double.infinity,
+                  color: Colors.white,
+                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4),
+                      SizedBox(height: 50),
+                      // Header
+                      const Text(
+                        'Enter your\nmobile number',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                          height: 1.25,
+                          letterSpacing: -0.5,
                         ),
-                        child: const Row(
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'We\'ll send you a verification code',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF888888),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
+
+                      // Phone input
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7F7F7),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: _isFocused
+                                ? const Color(0xFF2E7D32)
+                                : Colors.transparent,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
                           children: [
-                            // Placeholder for Indian flag icon (add Flutter SVG or image)
-                            Icon(Icons.flag), // Replace with actual flag
-                            SizedBox(width: 4),
-                            Text('+91'),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 14,
+                              ),
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
+                                    color: Color(0xFFE0E0E0),
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  _buildIndianFlag(),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    '+91',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF1A1A1A),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    size: 18,
+                                    color: Color(0xFF888888),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Focus(
+                                onFocusChange: (focused) {
+                                  setState(() => _isFocused = focused);
+                                },
+                                child: TextField(
+                                  controller: _phoneController,
+                                  keyboardType: TextInputType.phone,
+                                  maxLength: 10,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 1.5,
+                                    color: Color(0xFF1A1A1A),
+                                  ),
+                                  decoration: const InputDecoration(
+                                    hintText: '00000 00000',
+                                    hintStyle: TextStyle(
+                                      color: Color(0xFFBBBBBB),
+                                      letterSpacing: 1.5,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 14,
+                                    ),
+                                    counterText: '',
+                                  ),
+                                ),
+                              ),
+                            ),
+                            AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: _hasText
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(right: 14),
+                                      child: Container(
+                                        key: const ValueKey('check'),
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF2E7D32),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox(key: ValueKey('empty')),
+                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: TextField(
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            hintText: 'Enter your mobile number',
-                            border: OutlineInputBorder(),
+
+                      const SizedBox(height: 14),
+
+                      // Terms checkbox
+                      GestureDetector(
+                        onTap: () {
+                          setState(() => _agreeToTerms = !_agreeToTerms);
+                        },
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color: _agreeToTerms
+                                    ? const Color(0xFF2E7D32)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(5),
+                                border: Border.all(
+                                  color: _agreeToTerms
+                                      ? const Color(0xFF2E7D32)
+                                      : const Color(0xFFCCCCCC),
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: _agreeToTerms
+                                  ? const Icon(
+                                      Icons.check,
+                                      size: 13,
+                                      color: Colors.white,
+                                    )
+                                  : null,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: RichText(
+                                text: const TextSpan(
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Color(0xFF666666),
+                                    height: 1.4,
+                                  ),
+                                  children: [
+                                    TextSpan(text: 'I agree to the '),
+                                    TextSpan(
+                                      text: 'Terms & Conditions',
+                                      style: TextStyle(
+                                        color: Color(0xFF2E7D32),
+                                        fontWeight: FontWeight.w600,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                    TextSpan(text: ' and '),
+                                    TextSpan(
+                                      text: 'Privacy Policy',
+                                      style: TextStyle(
+                                        color: Color(0xFF2E7D32),
+                                        fontWeight: FontWeight.w600,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // GET OTP Button
+                      GestureDetector(
+                        onTapDown: (_) => _buttonController.forward(),
+                        onTapUp: (_) => _buttonController.reverse(),
+                        onTapCancel: () => _buttonController.reverse(),
+                        onTap: (_agreeToTerms && _hasText)
+                            ? () => Navigator.pushNamed(context, '/otp')
+                            : null,
+                        child: ScaleTransition(
+                          scale: _buttonScaleAnimation,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            width: double.infinity,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: (_agreeToTerms && _hasText)
+                                  ? const Color(0xFF2E7D32)
+                                  : const Color(0xFFE0E0E0),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            alignment: Alignment.center,
+                            child: AnimatedDefaultTextStyle(
+                              duration: const Duration(milliseconds: 250),
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,
+                                color: (_agreeToTerms && _hasText)
+                                    ? Colors.white
+                                    : const Color(0xFFAAAAAA),
+                              ),
+                              child: const Text('GET OTP'),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  CheckboxListTile(
-                    value: _agreeToTerms,
-                    onChanged: (value) {
-                      setState(() {
-                        _agreeToTerms = value ?? false;
-                      });
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                    title: const Text(
-                      'By continuing, you agree to our Terms & Conditions',
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _agreeToTerms
-                          ? () {
-                              Navigator.pushNamed(context, '/otp');
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: const Text('NEXT'),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIndianFlag() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(3),
+      child: SizedBox(
+        width: 24,
+        height: 16,
+        child: Column(
+          children: [
+            Expanded(child: Container(color: const Color(0xFFFF9933))),
+            Expanded(child: Container(color: Colors.white)),
+            Expanded(child: Container(color: const Color(0xFF138808))),
+          ],
+        ),
       ),
     );
   }
