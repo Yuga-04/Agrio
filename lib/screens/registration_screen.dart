@@ -59,7 +59,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   @override
   void initState() {
     super.initState();
-
     _slideController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
@@ -68,7 +67,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
-
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
@@ -77,10 +75,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       begin: 0,
       end: 1,
     ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
-
     _slideController.forward();
     _fadeController.forward();
-
     _nameController.addListener(() => setState(() {}));
   }
 
@@ -115,7 +111,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // ── Image section ──
           SizedBox(
             height: size.height * 0.38,
             width: double.infinity,
@@ -146,16 +141,11 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                   top: 48,
                   left: 16,
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/otp',
-                        arguments: {
-                          'phone': _phoneNumber,
-                          'language': _language,
-                        },
-                      );
-                    },
+                    onTap: () => Navigator.pushReplacementNamed(
+                      context,
+                      '/otp',
+                      arguments: {'phone': _phoneNumber, 'language': _language},
+                    ),
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -225,8 +215,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
               ],
             ),
           ),
-
-          // ── White form section ──
           Expanded(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -290,9 +278,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                             color: Color(0xFF888888),
                           ),
                         ),
-
                         const SizedBox(height: 20),
-
                         _buildLabel('Full Name'),
                         const SizedBox(height: 6),
                         _buildTextField(
@@ -300,9 +286,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                           hint: 'Enter your full name',
                           icon: Icons.person_outline_rounded,
                         ),
-
                         const SizedBox(height: 14),
-
                         _buildLabel('Mobile Number'),
                         const SizedBox(height: 6),
                         Container(
@@ -344,9 +328,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                             ],
                           ),
                         ),
-
                         const SizedBox(height: 14),
-
                         _buildLabel('District'),
                         const SizedBox(height: 6),
                         _buildDropdown(
@@ -357,9 +339,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                           onChanged: (val) =>
                               setState(() => _selectedDistrict = val),
                         ),
-
                         const SizedBox(height: 14),
-
                         _buildLabel('Block'),
                         const SizedBox(height: 6),
                         _buildDropdown(
@@ -372,9 +352,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                               : null,
                           disabled: _selectedDistrict == null,
                         ),
-
                         const SizedBox(height: 14),
-
                         _buildLabel('Village'),
                         const SizedBox(height: 6),
                         _buildDropdown(
@@ -387,12 +365,17 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                               : null,
                           disabled: _selectedBlock == null,
                         ),
-
                         const SizedBox(height: 24),
-
                         GestureDetector(
                           onTap: _isFormValid
-                              ? () => Navigator.pushNamed(context, '/menu')
+                              ? () => Navigator.pushNamed(
+                                  context,
+                                  '/home',
+                                  arguments: {
+                                    'name': _nameController.text
+                                        .trim(), // ← KEY FIX
+                                  },
+                                )
                               : null,
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
@@ -431,17 +414,15 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF444444),
-        letterSpacing: 0.2,
-      ),
-    );
-  }
+  Widget _buildLabel(String text) => Text(
+    text,
+    style: const TextStyle(
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      color: Color(0xFF444444),
+      letterSpacing: 0.2,
+    ),
+  );
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -485,10 +466,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     );
   }
 
-  // FIX: Replace DropdownButtonFormField with a custom Row-based dropdown.
-  // DropdownButtonFormField's internal layout cannot reliably align prefixIcon
-  // with hint text — the icon drifts to the bottom while hint floats to the top.
-  // Building it manually with a Row gives us full control over vertical alignment.
   Widget _buildDropdown({
     required String hint,
     required IconData icon,
@@ -519,7 +496,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
         border: Border.all(color: borderColor, width: 1.5),
       ),
       child: Theme(
-        // Remove the default underline that DropdownButton adds
         data: Theme.of(context).copyWith(
           inputDecorationTheme: const InputDecorationTheme(
             border: InputBorder.none,
@@ -542,7 +518,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
               onChanged: disabled ? null : onChanged,
               dropdownColor: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              // ── Custom hint built as a Row so icon + text stay centered ──
               hint: Row(
                 children: [
                   const SizedBox(width: 12),
@@ -558,26 +533,31 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                   ),
                 ],
               ),
-              // ── Selected value row ──
               selectedItemBuilder: value == null
                   ? null
-                  : (context) => items.map((item) {
-                      return Row(
-                        children: [
-                          const SizedBox(width: 12),
-                          Icon(icon, size: 18, color: const Color(0xFF2E7D32)),
-                          const SizedBox(width: 10),
-                          Text(
-                            item,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF1A1A1A),
-                            ),
+                  : (context) => items
+                        .map(
+                          (item) => Row(
+                            children: [
+                              const SizedBox(width: 12),
+                              Icon(
+                                icon,
+                                size: 18,
+                                color: const Color(0xFF2E7D32),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                item,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFF1A1A1A),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      );
-                    }).toList(),
+                        )
+                        .toList(),
               items: items
                   .map(
                     (item) => DropdownMenuItem(

@@ -3,6 +3,7 @@ import 'screens/language_support_screen.dart';
 import 'screens/phone_entry_screen.dart';
 import 'screens/otp_screen.dart';
 import 'screens/registration_screen.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Uzhavar',
+      title: 'Agrio',
       debugShowCheckedModeBanner: false,
       initialRoute: '/language',
       onGenerateRoute: (settings) {
@@ -25,12 +26,6 @@ class MyApp extends StatelessWidget {
               builder: (_) => const LanguageSupportScreen(),
             );
 
-          // FIX: PhoneEntryScreen accepts two possible arg shapes:
-          //   1. Map<String,String> with key 'code' → language map passed directly
-          //      from LanguageSupportScreen (forward navigation).
-          //   2. Map with keys 'phone' and 'language' → wrapped map passed from
-          //      OTPScreen (back navigation).
-          // PhoneEntryScreen.didChangeDependencies() handles both cases.
           case '/phone':
             return MaterialPageRoute(
               settings: settings,
@@ -61,6 +56,18 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               settings: settings,
               builder: (_) => RegistrationScreen(phoneNumber: phone),
+            );
+
+          // HomeScreen receives {name} passed from RegistrationScreen
+          case '/home':
+            final args = settings.arguments;
+            String name = '';
+            if (args is Map) {
+              name = (args['name'] as String?) ?? '';
+            }
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => HomeScreen(userName: name),
             );
 
           default:

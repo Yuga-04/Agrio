@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'app_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String userName; // ← NEW
+  const HomeScreen({super.key, this.userName = ''});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -12,11 +13,20 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
 
-  late final List<Widget> _bodies = [
-    _HomeBody(onAvatarTap: () => _scaffoldKey.currentState?.openDrawer()),
-    const Placeholder(),
-    const Placeholder(),
-  ];
+  late final List<Widget> _bodies;
+
+  @override
+  void initState() {
+    super.initState();
+    _bodies = [
+      _HomeBody(
+        onAvatarTap: () => _scaffoldKey.currentState?.openDrawer(),
+        userName: widget.userName, // ← PASS DOWN
+      ),
+      const Placeholder(),
+      const Placeholder(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
 // ─────────────────────────────────────────────
 class _HomeBody extends StatelessWidget {
   final VoidCallback onAvatarTap;
-  const _HomeBody({required this.onAvatarTap});
+  final String userName; // ← NEW
+  const _HomeBody({required this.onAvatarTap, required this.userName});
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +89,7 @@ class _HomeBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _TopBar(onAvatarTap: onAvatarTap),
+          _TopBar(onAvatarTap: onAvatarTap, userName: userName), // ← PASS DOWN
           const SizedBox(height: 20),
           const _SearchBar(),
           const SizedBox(height: 24),
@@ -99,11 +110,14 @@ class _HomeBody extends StatelessWidget {
 // ─────────────────────────────────────────────
 class _TopBar extends StatelessWidget {
   final VoidCallback onAvatarTap;
-  const _TopBar({required this.onAvatarTap});
+  final String userName; // ← NEW
+  const _TopBar({required this.onAvatarTap, required this.userName});
 
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
+    // Show name if available, else fallback to 'Farmer'
+    final displayName = userName.isNotEmpty ? userName : 'Farmer'; // ← KEY FIX
     return Padding(
       padding: EdgeInsets.fromLTRB(20, top + 14, 20, 0),
       child: Row(
@@ -132,8 +146,8 @@ class _TopBar extends StatelessWidget {
                 const SizedBox(width: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       'Good Morning 👋',
                       style: TextStyle(
                         fontSize: 11,
@@ -142,8 +156,8 @@ class _TopBar extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Ravi Kumar',
-                      style: TextStyle(
+                      displayName, // ← REPLACED hardcoded 'Ravi Kumar'
+                      style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF1A1A1A),
@@ -156,7 +170,6 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // Coins badge
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -166,8 +179,7 @@ class _TopBar extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.monetization_on,
-                    color: Color(0xFFFF8C00), size: 15),
+                Icon(Icons.monetization_on, color: Color(0xFFFF8C00), size: 15),
                 SizedBox(width: 4),
                 Text(
                   '50',
@@ -345,7 +357,11 @@ class _ToolsAndServices extends StatelessWidget {
     {'label': 'Weather', 'icon': Icons.cloud_outlined, 'isNew': false},
     {'label': 'Mandi\nPrice', 'icon': Icons.trending_up, 'isNew': false},
     {'label': 'Crop\nCare', 'icon': Icons.eco_outlined, 'isNew': false},
-    {'label': 'Fertilizer\nCalc', 'icon': Icons.calculate_outlined, 'isNew': false},
+    {
+      'label': 'Fertilizer\nCalc',
+      'icon': Icons.calculate_outlined,
+      'isNew': false,
+    },
     {'label': 'Protection', 'icon': Icons.shield_outlined, 'isNew': false},
     {'label': 'Bazaar', 'icon': Icons.storefront_outlined, 'isNew': false},
   ];
@@ -414,7 +430,9 @@ class _ToolsAndServices extends StatelessWidget {
                           right: -5,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 5, vertical: 2),
+                              horizontal: 5,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFF2E7D32),
                               borderRadius: BorderRadius.circular(6),
@@ -601,8 +619,11 @@ class _MandiPriceSection extends StatelessWidget {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined,
-                            size: 12, color: Color(0xFF2E7D32)),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 12,
+                          color: Color(0xFF2E7D32),
+                        ),
                         const SizedBox(width: 3),
                         Expanded(
                           child: Text(
