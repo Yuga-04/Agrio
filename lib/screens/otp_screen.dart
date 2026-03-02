@@ -207,7 +207,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 50),
+                      const SizedBox(height:20),
                       const Text(
                         'Enter OTP',
                         style: TextStyle(
