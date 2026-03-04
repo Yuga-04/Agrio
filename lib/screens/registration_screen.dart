@@ -118,7 +118,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
               fit: StackFit.expand,
               children: [
                 Image.asset(
-                  'assets/ocean_background.png',
+                  'assets/farmer_paddy.png',
                   fit: BoxFit.cover,
                   alignment: const Alignment(0, -0.2),
                 ),
