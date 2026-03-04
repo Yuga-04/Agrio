@@ -17,7 +17,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   );
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
-  // ScrollController to programmatically scroll when keyboard opens
   final ScrollController _scrollController = ScrollController();
 
   int _resendSeconds = 30;
@@ -73,7 +72,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
       _controllers[i].addListener(() => _checkComplete());
     }
 
-    // Listen to focus changes to scroll into view when keyboard opens
     for (int i = 0; i < 4; i++) {
       _focusNodes[i].addListener(() {
         if (_focusNodes[i].hasFocus) {
@@ -96,8 +94,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
     }
   }
 
-  /// Scrolls to the bottom of the scroll view so OTP boxes and button
-  /// remain visible above the keyboard.
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -154,26 +150,21 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    // How much the keyboard is pushing up
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final keyboardOpen = bottomInset > 0;
 
     return Scaffold(
-      // resizeToAvoidBottomInset: true ensures the body shrinks when the
-      // keyboard opens, which is required for our scroll approach to work.
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         controller: _scrollController,
-        // physics that feel natural
         physics: const ClampingScrollPhysics(),
         child: Column(
           children: [
-            // ── Image section — shrinks when keyboard is open ──
+            // ── Image section ──
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
-              // Collapse the image so the OTP section scrolls into view
               height: keyboardOpen ? size.height * 0.28 : size.height * 0.60,
               width: double.infinity,
               child: Stack(
@@ -199,7 +190,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  // Back button
                   Positioned(
                     top: 48,
                     left: 16,
@@ -376,7 +366,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                         ),
                       ),
 
-                      // Extra bottom padding so content clears the keyboard
                       SizedBox(height: keyboardOpen ? 16 : 0),
                     ],
                   ),
@@ -412,7 +401,7 @@ class _OTPBoxState extends State<_OTPBox> {
   void initState() {
     super.initState();
     widget.focusNode.addListener(() {
-      setState(() => _isFocused = widget.focusNode.hasFocus);
+      if (mounted) setState(() => _isFocused = widget.focusNode.hasFocus);
     });
   }
 
@@ -440,27 +429,58 @@ class _OTPBoxState extends State<_OTPBox> {
           width: _isFocused ? 2.0 : 1.5,
         ),
       ),
-      child: TextField(
-        controller: widget.controller,
-        focusNode: widget.focusNode,
-        maxLength: 1,
-        keyboardType: TextInputType.number,
-        textAlign: TextAlign.center,
-        textAlignVertical: TextAlignVertical.center,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        style: const TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF1A1A1A),
-          height: 2.0,
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // TextField: handles all input, text made transparent
+            // so we can render our own perfectly-centered Text below.
+            SizedBox(
+              width: 64,
+              height: 60,
+              child: TextField(
+                controller: widget.controller,
+                focusNode: widget.focusNode,
+                maxLength: 1,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                style: const TextStyle(
+                  // Transparent — digit is painted by the Text widget below
+                  color: Colors.transparent,
+                  fontSize: 22,
+                  height: 1.0,
+                ),
+                cursorColor: const Color(0xFF2E7D32),
+                decoration: const InputDecoration(
+                  counterText: '',
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  // Zero padding + isDense removes all extra vertical space
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
+                ),
+                onChanged: widget.onChanged,
+              ),
+            ),
+            // Visible digit — always perfectly centred via Stack + Center
+            IgnorePointer(
+              child: ValueListenableBuilder<TextEditingValue>(
+                valueListenable: widget.controller,
+                builder: (_, value, __) => Text(
+                  value.text,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1A1A),
+                    height: 1.0,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        decoration: const InputDecoration(
-          counterText: '',
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.zero,
-          isDense: true,
-        ),
-        onChanged: widget.onChanged,
       ),
     );
   }
