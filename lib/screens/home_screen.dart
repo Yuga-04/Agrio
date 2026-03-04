@@ -71,10 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _bodies,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _bodies),
     );
   }
 }
@@ -191,8 +188,7 @@ class _TopBar extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.monetization_on,
-                    color: Color(0xFFFF8C00), size: 15),
+                Icon(Icons.monetization_on, color: Color(0xFFFF8C00), size: 15),
                 SizedBox(width: 4),
                 Text(
                   '50',
@@ -215,6 +211,42 @@ class _TopBar extends StatelessWidget {
               clipBehavior: Clip.none,
               children: [
                 const _IconBtn(icon: Icons.notifications_outlined),
+                if (_unreadCount > 0)
+                  Positioned(
+                    top: 2,
+                    right: 4,
+                    child: Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFF8C00),
+                        shape: BoxShape.circle,
+                      ),
+                      // child: Center(
+                      //   child: Text(
+                      //     _unreadCount > 9 ? '9+' : '$_unreadCount',
+                      //     style: const TextStyle(
+                      //       color: Colors.white,
+                      //       fontSize: 8,
+                      //       fontWeight: FontWeight.w800,
+                      //     ),
+                      //   ),
+                      // ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Cart icon
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/cart'),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const _IconBtn(icon: Icons.shopping_cart_outlined),
                 if (_unreadCount > 0)
                   Positioned(
                     top: -2,
@@ -241,11 +273,6 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
-
-          const SizedBox(width: 8),
-
-          // Cart icon
-          const _IconBtn(icon: Icons.shopping_cart_outlined),
         ],
       ),
     );
@@ -415,7 +442,11 @@ class _ToolsAndServices extends StatelessWidget {
     {'label': 'Weather', 'icon': Icons.cloud_outlined, 'isNew': false},
     {'label': 'Mandi\nPrice', 'icon': Icons.trending_up, 'isNew': false},
     {'label': 'Crop\nCare', 'icon': Icons.eco_outlined, 'isNew': false},
-    {'label': 'Fertilizer\nCalc', 'icon': Icons.calculate_outlined, 'isNew': false},
+    {
+      'label': 'Fertilizer\nCalc',
+      'icon': Icons.calculate_outlined,
+      'isNew': false,
+    },
     {'label': 'Protection', 'icon': Icons.shield_outlined, 'isNew': false},
     {'label': 'Bazaar', 'icon': Icons.storefront_outlined, 'isNew': false},
   ];
@@ -643,8 +674,7 @@ class _MandiPriceSection extends StatelessWidget {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color:
-                                const Color(0xFF2E7D32).withOpacity(0.07),
+                            color: const Color(0xFF2E7D32).withOpacity(0.07),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
