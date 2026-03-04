@@ -17,12 +17,14 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   );
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
 
+  // ScrollController to programmatically scroll when keyboard opens
+  final ScrollController _scrollController = ScrollController();
+
   int _resendSeconds = 30;
   bool _canResend = false;
   bool _isComplete = false;
   Timer? _timer;
 
-  // Parsed from route arguments — both set via didChangeDependencies
   String _phoneNumber = '';
   Map<String, String>? _language;
 
@@ -70,6 +72,15 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
     for (int i = 0; i < 4; i++) {
       _controllers[i].addListener(() => _checkComplete());
     }
+
+    // Listen to focus changes to scroll into view when keyboard opens
+    for (int i = 0; i < 4; i++) {
+      _focusNodes[i].addListener(() {
+        if (_focusNodes[i].hasFocus) {
+          _scrollToBottom();
+        }
+      });
+    }
   }
 
   @override
@@ -83,6 +94,20 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
         _language = langRaw.map((k, v) => MapEntry(k.toString(), v.toString()));
       }
     }
+  }
+
+  /// Scrolls to the bottom of the scroll view so OTP boxes and button
+  /// remain visible above the keyboard.
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _startTimer() {
@@ -120,6 +145,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
     _slideController.dispose();
     _fadeController.dispose();
     _buttonController.dispose();
+    _scrollController.dispose();
     for (var c in _controllers) c.dispose();
     for (var f in _focusNodes) f.dispose();
     super.dispose();
@@ -128,74 +154,86 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    // How much the keyboard is pushing up
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final keyboardOpen = bottomInset > 0;
 
     return Scaffold(
+      // resizeToAvoidBottomInset: true ensures the body shrinks when the
+      // keyboard opens, which is required for our scroll approach to work.
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          // ── Image section (60% of screen) ──
-          SizedBox(
-            height: size.height * 0.60,
-            width: double.infinity,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  'assets/farmer_spraying.png',
-                  fit: BoxFit.cover,
-                  alignment: const Alignment(0, -0.2),
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: size.height * 0.15,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.white],
-                      ),
-                    ),
+      body: SingleChildScrollView(
+        controller: _scrollController,
+        // physics that feel natural
+        physics: const ClampingScrollPhysics(),
+        child: Column(
+          children: [
+            // ── Image section — shrinks when keyboard is open ──
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              // Collapse the image so the OTP section scrolls into view
+              height: keyboardOpen ? size.height * 0.28 : size.height * 0.60,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    'assets/farmer_spraying.png',
+                    fit: BoxFit.cover,
+                    alignment: const Alignment(0, -0.2),
                   ),
-                ),
-                // Back button — passes {phone, language} back to PhoneEntryScreen
-                Positioned(
-                  top: 48,
-                  left: 16,
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        '/phone',
-                        arguments: {
-                          'phone': _phoneNumber,
-                          'language': _language,
-                        },
-                      );
-                    },
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: size.height * 0.15,
                     child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.85),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 18,
-                        color: Color(0xFF1A1A1A),
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.white],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                  // Back button
+                  Positioned(
+                    top: 48,
+                    left: 16,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacementNamed(
+                          context,
+                          '/phone',
+                          arguments: {
+                            'phone': _phoneNumber,
+                            'language': _language,
+                          },
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.85),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 18,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // ── White card section ──
-          Expanded(
-            child: FadeTransition(
+            // ── White card section ──
+            FadeTransition(
               opacity: _fadeAnimation,
               child: SlideTransition(
                 position: _slideAnimation,
@@ -207,7 +245,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height:20),
+                      const SizedBox(height: 20),
                       const Text(
                         'Enter OTP',
                         style: TextStyle(
@@ -294,7 +332,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
 
                       const SizedBox(height: 20),
 
-                      // VERIFY — passes {phone, language} to RegistrationScreen
+                      // VERIFY button
                       GestureDetector(
                         onTapDown: (_) => _buttonController.forward(),
                         onTapUp: (_) => _buttonController.reverse(),
@@ -337,13 +375,16 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
+
+                      // Extra bottom padding so content clears the keyboard
+                      SizedBox(height: keyboardOpen ? 16 : 0),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
