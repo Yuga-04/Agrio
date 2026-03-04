@@ -4,6 +4,8 @@ import 'screens/phone_entry_screen.dart';
 import 'screens/otp_screen.dart';
 import 'screens/registration_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/order_screen.dart';
+import 'screens/kisan_vani_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -68,6 +70,26 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               settings: settings,
               builder: (_) => HomeScreen(userName: name),
+            );
+
+          // Standalone Orders screen (deep-link / direct navigation)
+          case '/orders':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const Scaffold(
+                backgroundColor: Colors.white,
+                body: OrderScreen(),
+              ),
+            );
+
+          // Standalone Kisan Vani screen (deep-link / direct navigation)
+          case '/vani':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const Scaffold(
+                backgroundColor: Colors.white,
+                body: KisanVaniScreen(),
+              ),
             );
 
           default:

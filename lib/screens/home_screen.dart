@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'app_drawer.dart';
+import 'order_screen.dart';
+import 'kisan_vani_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String userName; // ← NEW
+  final String userName;
   const HomeScreen({super.key, this.userName = ''});
 
   @override
@@ -21,10 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _bodies = [
       _HomeBody(
         onAvatarTap: () => _scaffoldKey.currentState?.openDrawer(),
-        userName: widget.userName, // ← PASS DOWN
+        userName: widget.userName,
       ),
-      const Placeholder(),
-      const Placeholder(),
+      const OrderScreen(),
+      const KisanVaniScreen(),
     ];
   }
 
@@ -79,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
 // ─────────────────────────────────────────────
 class _HomeBody extends StatelessWidget {
   final VoidCallback onAvatarTap;
-  final String userName; // ← NEW
+  final String userName;
   const _HomeBody({required this.onAvatarTap, required this.userName});
 
   @override
@@ -89,7 +91,7 @@ class _HomeBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _TopBar(onAvatarTap: onAvatarTap, userName: userName), // ← PASS DOWN
+          _TopBar(onAvatarTap: onAvatarTap, userName: userName),
           const SizedBox(height: 20),
           const _SearchBar(),
           const SizedBox(height: 24),
@@ -110,14 +112,13 @@ class _HomeBody extends StatelessWidget {
 // ─────────────────────────────────────────────
 class _TopBar extends StatelessWidget {
   final VoidCallback onAvatarTap;
-  final String userName; // ← NEW
+  final String userName;
   const _TopBar({required this.onAvatarTap, required this.userName});
 
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
-    // Show name if available, else fallback to 'Farmer'
-    final displayName = userName.isNotEmpty ? userName : 'Farmer'; // ← KEY FIX
+    final displayName = userName.isNotEmpty ? userName : 'Farmer';
     return Padding(
       padding: EdgeInsets.fromLTRB(20, top + 14, 20, 0),
       child: Row(
@@ -156,7 +157,7 @@ class _TopBar extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      displayName, // ← REPLACED hardcoded 'Ravi Kumar'
+                      displayName,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
