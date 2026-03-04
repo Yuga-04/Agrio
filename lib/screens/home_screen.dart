@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F5F5),
       drawer: const AppDrawer(),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
@@ -71,7 +71,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: _bodies[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _bodies,
+      ),
     );
   }
 }
@@ -115,14 +118,19 @@ class _TopBar extends StatelessWidget {
   final String userName;
   const _TopBar({required this.onAvatarTap, required this.userName});
 
+  // Hard-coded unread count — replace with your state/provider later
+  static const int _unreadCount = 3;
+
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
     final displayName = userName.isNotEmpty ? userName : 'Farmer';
+
     return Padding(
       padding: EdgeInsets.fromLTRB(20, top + 14, 20, 0),
       child: Row(
         children: [
+          // Avatar + greeting — opens drawer
           GestureDetector(
             onTap: onAvatarTap,
             child: Row(
@@ -170,7 +178,10 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
+
           const Spacer(),
+
+          // Coins chip
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -180,7 +191,8 @@ class _TopBar extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.monetization_on, color: Color(0xFFFF8C00), size: 15),
+                Icon(Icons.monetization_on,
+                    color: Color(0xFFFF8C00), size: 15),
                 SizedBox(width: 4),
                 Text(
                   '50',
@@ -193,9 +205,46 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(width: 8),
-          const _IconBtn(icon: Icons.notifications_outlined),
+
+          // Notification bell with badge — navigates to /notifications
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/notifications'),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const _IconBtn(icon: Icons.notifications_outlined),
+                if (_unreadCount > 0)
+                  Positioned(
+                    top: -2,
+                    right: -2,
+                    child: Container(
+                      width: 15,
+                      height: 15,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFF8C00),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          _unreadCount > 9 ? '9+' : '$_unreadCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
           const SizedBox(width: 8),
+
+          // Cart icon
           const _IconBtn(icon: Icons.shopping_cart_outlined),
         ],
       ),
@@ -235,9 +284,16 @@ class _SearchBar extends StatelessWidget {
       child: Container(
         height: 46,
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F7F7),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFEEEEEE)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Row(
           children: const [
@@ -259,6 +315,7 @@ class _SearchBar extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(width: 14),
           ],
         ),
       ),
@@ -358,11 +415,7 @@ class _ToolsAndServices extends StatelessWidget {
     {'label': 'Weather', 'icon': Icons.cloud_outlined, 'isNew': false},
     {'label': 'Mandi\nPrice', 'icon': Icons.trending_up, 'isNew': false},
     {'label': 'Crop\nCare', 'icon': Icons.eco_outlined, 'isNew': false},
-    {
-      'label': 'Fertilizer\nCalc',
-      'icon': Icons.calculate_outlined,
-      'isNew': false,
-    },
+    {'label': 'Fertilizer\nCalc', 'icon': Icons.calculate_outlined, 'isNew': false},
     {'label': 'Protection', 'icon': Icons.shield_outlined, 'isNew': false},
     {'label': 'Bazaar', 'icon': Icons.storefront_outlined, 'isNew': false},
   ];
@@ -412,12 +465,19 @@ class _ToolsAndServices extends StatelessWidget {
                         width: 62,
                         height: 62,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF7F7F7),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: const Color(0xFFEEEEEE),
                             width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Icon(
                           tool['icon'] as IconData,
@@ -583,7 +643,8 @@ class _MandiPriceSection extends StatelessWidget {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2E7D32).withOpacity(0.07),
+                            color:
+                                const Color(0xFF2E7D32).withOpacity(0.07),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
