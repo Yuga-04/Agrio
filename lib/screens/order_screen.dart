@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class OrderScreen extends StatefulWidget {
-  const OrderScreen({super.key});
+  final bool showBackButton;
+  const OrderScreen({super.key, this.showBackButton = false});
 
   @override
   State<OrderScreen> createState() => _OrderScreenState();
@@ -31,33 +32,59 @@ class _OrderScreenState extends State<OrderScreen>
         // ── Header ──
         Container(
           color: Colors.white,
-          padding: EdgeInsets.fromLTRB(20, top + 14, 20, 0),
+          padding: EdgeInsets.fromLTRB(
+            widget.showBackButton ? 4 : 20,
+            top + 6,
+            20,
+            0,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'My Orders',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1A1A1A),
-                      letterSpacing: -0.5,
-                    ),
+                  Row(
+                    children: [
+                      if (widget.showBackButton)
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Color(0xFF1A1A1A),
+                            size: 22,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                          padding: EdgeInsets.zero,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      if (widget.showBackButton) const SizedBox(width: 4),
+                      const Text(
+                        'My Orders',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1A1A1A),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ],
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2E7D32).withOpacity(0.08),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.filter_list,
-                            color: Color(0xFF2E7D32), size: 15),
+                        Icon(
+                          Icons.filter_list,
+                          color: Color(0xFF2E7D32),
+                          size: 15,
+                        ),
                         SizedBox(width: 4),
                         Text(
                           'Filter',
@@ -79,9 +106,13 @@ class _OrderScreenState extends State<OrderScreen>
                 labelColor: const Color(0xFF2E7D32),
                 unselectedLabelColor: const Color(0xFF888888),
                 labelStyle: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 13),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
                 unselectedLabelStyle: const TextStyle(
-                    fontWeight: FontWeight.w500, fontSize: 13),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                ),
                 indicatorColor: const Color(0xFF2E7D32),
                 indicatorWeight: 2.5,
                 tabs: const [
@@ -229,8 +260,11 @@ class _OrderCard extends StatelessWidget {
                   color: const Color(0xFF2E7D32).withOpacity(0.07),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(order.icon,
-                    color: const Color(0xFF2E7D32), size: 22),
+                child: Icon(
+                  order.icon,
+                  color: const Color(0xFF2E7D32),
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -249,7 +283,9 @@ class _OrderCard extends StatelessWidget {
                     Text(
                       '${order.quantity}  ·  ${order.date}',
                       style: const TextStyle(
-                          fontSize: 11, color: Color(0xFF888888)),
+                        fontSize: 11,
+                        color: Color(0xFF888888),
+                      ),
                     ),
                   ],
                 ),
@@ -280,8 +316,10 @@ class _OrderCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: order.statusBg,
                   borderRadius: BorderRadius.circular(20),
@@ -310,10 +348,11 @@ class _EmptyState extends StatelessWidget {
   final IconData icon;
   final String message;
   final String subtitle;
-  const _EmptyState(
-      {required this.icon,
-      required this.message,
-      required this.subtitle});
+  const _EmptyState({
+    required this.icon,
+    required this.message,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {

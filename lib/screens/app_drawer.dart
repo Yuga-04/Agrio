@@ -42,7 +42,10 @@ class AppDrawer extends StatelessWidget {
           _DrawerItem(
             icon: Icons.shopping_bag_outlined,
             label: 'My Orders',
-            onTap: () => Navigator.pop(context),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/orders');
+            },
           ),
           _DrawerItem(
             icon: Icons.language_outlined,
@@ -63,11 +66,12 @@ class AppDrawer extends StatelessWidget {
 
           // Policies expansion
           Theme(
-            data: Theme.of(context).copyWith(
-              dividerColor: Colors.transparent,
-            ),
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
-              leading: const Icon(Icons.policy_outlined, color: Color(0xFF2E7D32)),
+              leading: const Icon(
+                Icons.policy_outlined,
+                color: Color(0xFF2E7D32),
+              ),
               title: const Text(
                 'Policies & Support',
                 style: TextStyle(
@@ -79,10 +83,22 @@ class AppDrawer extends StatelessWidget {
               iconColor: const Color(0xFF2E7D32),
               collapsedIconColor: const Color(0xFF888888),
               children: [
-                _DrawerSubItem(icon: Icons.shield_outlined, label: 'Privacy Policy'),
-                _DrawerSubItem(icon: Icons.local_shipping_outlined, label: 'Shipping & Delivery Policy'),
-                _DrawerSubItem(icon: Icons.cancel_outlined, label: 'Cancellation Policy'),
-                _DrawerSubItem(icon: Icons.assignment_return_outlined, label: 'Return Policy'),
+                _DrawerSubItem(
+                  icon: Icons.shield_outlined,
+                  label: 'Privacy Policy',
+                ),
+                _DrawerSubItem(
+                  icon: Icons.local_shipping_outlined,
+                  label: 'Shipping & Delivery Policy',
+                ),
+                _DrawerSubItem(
+                  icon: Icons.cancel_outlined,
+                  label: 'Cancellation Policy',
+                ),
+                _DrawerSubItem(
+                  icon: Icons.assignment_return_outlined,
+                  label: 'Return Policy',
+                ),
                 _DrawerSubItem(icon: Icons.help_outline, label: 'Contact Us'),
               ],
             ),
@@ -98,7 +114,11 @@ class AppDrawer extends StatelessWidget {
             color: Colors.redAccent,
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamedAndRemoveUntil(context, '/phone', (route) => false);
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/phone',
+                (route) => false,
+              );
             },
           ),
 
