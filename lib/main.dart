@@ -6,6 +6,7 @@ import 'screens/registration_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/order_screen.dart';
 import 'screens/kisan_vani_screen.dart';
+import 'screens/notification_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,6 +20,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Agrio',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: const Color(0xFF2E7D32),
+        primarySwatch: Colors.green,
+        scaffoldBackgroundColor: Colors.white,
+        fontFamily: 'Roboto',
+      ),
       initialRoute: '/language',
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -60,7 +67,6 @@ class MyApp extends StatelessWidget {
               builder: (_) => RegistrationScreen(phoneNumber: phone),
             );
 
-          // HomeScreen receives {name} passed from RegistrationScreen
           case '/home':
             final args = settings.arguments;
             String name = '';
@@ -72,7 +78,6 @@ class MyApp extends StatelessWidget {
               builder: (_) => HomeScreen(userName: name),
             );
 
-          // Standalone Orders screen (deep-link / direct navigation)
           case '/orders':
             return MaterialPageRoute(
               settings: settings,
@@ -82,7 +87,6 @@ class MyApp extends StatelessWidget {
               ),
             );
 
-          // Standalone Kisan Vani screen (deep-link / direct navigation)
           case '/vani':
             return MaterialPageRoute(
               settings: settings,
@@ -90,6 +94,12 @@ class MyApp extends StatelessWidget {
                 backgroundColor: Colors.white,
                 body: KisanVaniScreen(),
               ),
+            );
+
+          case '/notifications':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const NotificationScreen(),
             );
 
           default:
