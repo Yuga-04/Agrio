@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -86,42 +87,33 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
+    final s = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Column(
         children: [
-          // ── Orange Header ──
+          // ── Header ──
           Container(
             padding: EdgeInsets.fromLTRB(16, top + 12, 16, 16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              // gradient: LinearGradient(
-              //   colors: [Color(0xFFFF8C00), Color(0xFFFFB300)],
-              //   begin: Alignment.topLeft,
-              //   end: Alignment.bottomRight,
-              // ),
-            ),
+            decoration: const BoxDecoration(color: Colors.white),
             child: Column(
               children: [
                 Row(
                   children: [
-                    // Back button
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                   
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.black,
-                          size: 25,
-                        ),
-                      
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.black,
+                        size: 22,
+                      ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Notifications',
-                        style: TextStyle(
+                        s.notifications,
+                        style: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
@@ -129,7 +121,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         ),
                       ),
                     ),
-                    // Mark all read
                     if (_unreadCount > 0)
                       GestureDetector(
                         onTap: _markAllRead,
@@ -142,9 +133,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             border: Border.all(
                                 color: Colors.green.withOpacity(0.4)),
                           ),
-                          child: const Text(
-                            'Mark all read',
-                            style: TextStyle(
+                          child: Text(
+                            s.markAllRead,
+                            style: const TextStyle(
                               color: Colors.green,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -187,21 +178,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
           ),
 
-          // ── Notification List ──
+          // ── List ──
           Expanded(
             child: _notifications.isEmpty
                 ? _EmptyState()
                 : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                    padding:
+                        const EdgeInsets.fromLTRB(16, 16, 16, 24),
                     physics: const BouncingScrollPhysics(),
                     itemCount: _notifications.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, i) {
-                      return _NotificationCard(
-                        notification: _notifications[i],
-                        onTap: () => _markRead(_notifications[i].id),
-                      );
-                    },
+                    separatorBuilder: (_, __) =>
+                        const SizedBox(height: 10),
+                    itemBuilder: (context, i) => _NotificationCard(
+                      notification: _notifications[i],
+                      onTap: () => _markRead(_notifications[i].id),
+                    ),
                   ),
           ),
         ],
@@ -244,7 +235,8 @@ class _NotificationCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(n.isRead ? 0.02 : 0.05),
+              color: Colors.black
+                  .withOpacity(n.isRead ? 0.02 : 0.05),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -253,7 +245,6 @@ class _NotificationCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon container
             Container(
               width: 44,
               height: 44,
@@ -265,8 +256,6 @@ class _NotificationCard extends StatelessWidget {
               child: Icon(icon, color: color, size: 22),
             ),
             const SizedBox(width: 12),
-
-            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +275,6 @@ class _NotificationCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Unread dot
                       if (!n.isRead)
                         Container(
                           width: 8,
@@ -315,7 +303,6 @@ class _NotificationCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      // Type chip
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 3),
@@ -339,9 +326,7 @@ class _NotificationCard extends StatelessWidget {
                       Text(
                         n.time,
                         style: const TextStyle(
-                          fontSize: 10,
-                          color: Color(0xFFAAAAAA),
-                        ),
+                            fontSize: 10, color: Color(0xFFAAAAAA)),
                       ),
                     ],
                   ),
@@ -391,6 +376,7 @@ class _NotificationCard extends StatelessWidget {
 class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -401,16 +387,13 @@ class _EmptyState extends StatelessWidget {
               color: Color(0xFFF0F4F0),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.notifications_off_outlined,
-              size: 48,
-              color: Color(0xFF2E7D32),
-            ),
+            child: const Icon(Icons.notifications_off_outlined,
+                size: 48, color: Color(0xFF2E7D32)),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'No notifications yet',
-            style: TextStyle(
+          Text(
+            s.notifications,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1A1A1A),
@@ -418,7 +401,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           const Text(
-            'We\'ll notify you about orders,\nprices and offers here',
+            "We'll notify you about orders,\nprices and offers here",
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, color: Color(0xFF888888)),
           ),

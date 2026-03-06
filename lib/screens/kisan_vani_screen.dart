@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
 
 class KisanVaniScreen extends StatefulWidget {
   const KisanVaniScreen({super.key});
@@ -9,22 +10,17 @@ class KisanVaniScreen extends StatefulWidget {
 
 class _KisanVaniScreenState extends State<KisanVaniScreen> {
   int _selectedChip = 0;
-
-  // Hard-coded unread count — replace with your state/provider later
   static const int _unreadCount = 3;
 
-  static const _chips = [
-    'All',
-    'Advisories',
-    'Schemes',
-    'Weather',
-    'Market',
-    'Tips',
+  static const _chipKeys = [
+    'All', 'Advisories', 'Schemes', 'Weather', 'Market', 'Tips',
   ];
 
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
+    final s = AppLocalizations.of(context);
+
     return Column(
       children: [
         // ── Header ──
@@ -39,50 +35,63 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Kisan Vani 📢',
-                        style: TextStyle(
+                        s.kisanVaniTitle,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF1A1A1A),
                           letterSpacing: -0.5,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
-                        'Farmer advisories & updates',
-                        style: TextStyle(
+                        s.farmerAdvisories,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF888888),
                         ),
                       ),
                     ],
                   ),
-                  // Notification bell with badge — navigates to /notifications
-              GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/notification'),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                const _IconBtn(icon: Icons.notifications_outlined),
-                if (_unreadCount > 0)
-                  Positioned(
-                    top: 2,
-                    right: 4,
-                    child: Container(
-                      width: 5,
-                      height: 5,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFF8C00),
-                        shape: BoxShape.circle,
-                      ),
+                  GestureDetector(
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/notification'),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const _IconBtn(
+                            icon: Icons.notifications_outlined),
+                        if (_unreadCount > 0)
+                          Positioned(
+                            top: -2,
+                            right: -2,
+                            child: Container(
+                              width: 15,
+                              height: 15,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFF8C00),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  _unreadCount > 9
+                                      ? '9+'
+                                      : '$_unreadCount',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-              ],
-            ),
-          ),
-   ],
+                ],
               ),
               const SizedBox(height: 14),
               // ── Featured Banner ──
@@ -99,10 +108,10 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
                 ),
                 child: Row(
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
                             '🌧  IMD Alert',
                             style: TextStyle(
@@ -164,7 +173,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               physics: const BouncingScrollPhysics(),
-              itemCount: _chips.length,
+              itemCount: _chipKeys.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
                 final selected = _selectedChip == i;
@@ -188,7 +197,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
                       ),
                     ),
                     child: Text(
-                      _chips[i],
+                      _chipKeys[i],
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -227,8 +236,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
       icon: Icons.tips_and_updates_outlined,
       iconColor: const Color(0xFF1565C0),
       title: 'Manage Leaf Curl in Chilli',
-      body:
-          'Spray Imidacloprid 0.3 ml/litre to control thrips causing leaf curl. Repeat after 10 days if infection persists.',
+      body: 'Spray Imidacloprid 0.3 ml/litre to control thrips causing leaf curl. Repeat after 10 days if infection persists.',
       source: 'TNAU Advisory',
       time: '2h ago',
       likes: 148,
@@ -241,8 +249,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
       icon: Icons.account_balance_outlined,
       iconColor: const Color(0xFF6A1B9A),
       title: 'PM Kisan 19th Instalment Released',
-      body:
-          'The 19th instalment of PM-KISAN (₹2,000) has been transferred to eligible farmers. Check your registered bank account.',
+      body: 'The 19th instalment of PM-KISAN (₹2,000) has been transferred to eligible farmers. Check your registered bank account.',
       source: 'Government of India',
       time: '5h ago',
       likes: 412,
@@ -255,8 +262,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
       icon: Icons.trending_up,
       iconColor: const Color(0xFFE65100),
       title: 'Tomato Prices Rise 20% This Week',
-      body:
-          'Due to reduced arrivals from Andhra Pradesh, tomato prices at Koyambedu APMC surged to ₹2,200/quintal.',
+      body: 'Due to reduced arrivals from Andhra Pradesh, tomato prices at Koyambedu APMC surged to ₹2,200/quintal.',
       source: 'Agmarknet · Market Intelligence',
       time: '8h ago',
       likes: 265,
@@ -269,8 +275,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
       icon: Icons.eco_outlined,
       iconColor: const Color(0xFF2E7D32),
       title: 'Summer Crop Water Management',
-      body:
-          'Irrigate sugarcane and banana in the early morning (5–7 AM) to reduce evaporation losses. Mulching can save up to 30% water.',
+      body: 'Irrigate sugarcane and banana in the early morning (5–7 AM) to reduce evaporation losses. Mulching can save up to 30% water.',
       source: 'Crop Care Expert',
       time: '1d ago',
       likes: 89,
@@ -283,8 +288,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
       icon: Icons.wb_sunny_outlined,
       iconColor: const Color(0xFF00838F),
       title: 'Clear Skies Expected Next Week',
-      body:
-          'Post-rain, clear weather is forecast from March 8–14. Ideal window for Rabi harvest operations and land preparation.',
+      body: 'Post-rain, clear weather is forecast from March 8–14. Ideal window for Rabi harvest operations and land preparation.',
       source: 'IMD · Tamil Nadu',
       time: '1d ago',
       likes: 197,
@@ -294,7 +298,7 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
 }
 
 // ─────────────────────────────────────────────
-// ICON BUTTON — matches HomeScreen exactly
+// ICON BUTTON
 // ─────────────────────────────────────────────
 class _IconBtn extends StatelessWidget {
   final IconData icon;
@@ -357,11 +361,11 @@ class _VaniCardState extends State<_VaniCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Tag row
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: widget.item.tagBg,
                   borderRadius: BorderRadius.circular(6),
@@ -378,12 +382,12 @@ class _VaniCardState extends State<_VaniCard> {
               const Spacer(),
               Text(
                 widget.item.time,
-                style: const TextStyle(fontSize: 10, color: Color(0xFFAAAAAA)),
+                style: const TextStyle(
+                    fontSize: 10, color: Color(0xFFAAAAAA)),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          // Icon + Title
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -426,22 +430,16 @@ class _VaniCardState extends State<_VaniCard> {
           const SizedBox(height: 12),
           const Divider(height: 1, color: Color(0xFFF0F0F0)),
           const SizedBox(height: 10),
-          // Footer
           Row(
             children: [
-              const Icon(
-                Icons.source_outlined,
-                size: 13,
-                color: Color(0xFF888888),
-              ),
+              const Icon(Icons.source_outlined,
+                  size: 13, color: Color(0xFF888888)),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   widget.item.source,
                   style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF888888),
-                  ),
+                      fontSize: 11, color: Color(0xFF888888)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -477,7 +475,8 @@ class _VaniCardState extends State<_VaniCard> {
               ),
               const SizedBox(width: 12),
               GestureDetector(
-                onTap: () => setState(() => _bookmarked = !_bookmarked),
+                onTap: () =>
+                    setState(() => _bookmarked = !_bookmarked),
                 child: Icon(
                   _bookmarked ? Icons.bookmark : Icons.bookmark_border,
                   size: 18,

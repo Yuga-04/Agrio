@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // Header
+          // ── Header ──
           DrawerHeader(
             decoration: const BoxDecoration(color: Color(0xFF2E7D32)),
             child: Column(
@@ -36,35 +39,35 @@ class AppDrawer extends StatelessWidget {
 
           _DrawerItem(
             icon: Icons.person_outline,
-            label: 'User Profile',
+            label: s.userProfile,
             onTap: () => Navigator.pop(context),
           ),
           _DrawerItem(
             icon: Icons.shopping_bag_outlined,
-            label: 'My Orders',
+            label: s.myOrders,
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, '/orders');
             },
           ),
+          // ── Change Language — navigates to language screen ──
           _DrawerItem(
             icon: Icons.language_outlined,
-            label: 'Change Language',
+            label: s.changeLanguage,
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/language');
+              Navigator.pushNamed(context, '/language', arguments: {'changeOnly': true});
             },
           ),
           _DrawerItem(
             icon: Icons.star_outline,
-            label: 'Rate Us',
+            label: s.rateUs,
             onTap: () => Navigator.pop(context),
           ),
 
           const Divider(height: 1, thickness: 1, indent: 16, endIndent: 16),
           const SizedBox(height: 4),
 
-          // Policies expansion
           Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
@@ -72,9 +75,9 @@ class AppDrawer extends StatelessWidget {
                 Icons.policy_outlined,
                 color: Color(0xFF2E7D32),
               ),
-              title: const Text(
-                'Policies & Support',
-                style: TextStyle(
+              title: Text(
+                s.policiesSupport,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF1A1A1A),
@@ -84,22 +87,17 @@ class AppDrawer extends StatelessWidget {
               collapsedIconColor: const Color(0xFF888888),
               children: [
                 _DrawerSubItem(
-                  icon: Icons.shield_outlined,
-                  label: 'Privacy Policy',
-                ),
+                    icon: Icons.shield_outlined, label: 'Privacy Policy'),
                 _DrawerSubItem(
-                  icon: Icons.local_shipping_outlined,
-                  label: 'Shipping & Delivery Policy',
-                ),
+                    icon: Icons.local_shipping_outlined,
+                    label: 'Shipping & Delivery Policy'),
                 _DrawerSubItem(
-                  icon: Icons.cancel_outlined,
-                  label: 'Cancellation Policy',
-                ),
+                    icon: Icons.cancel_outlined, label: 'Cancellation Policy'),
                 _DrawerSubItem(
-                  icon: Icons.assignment_return_outlined,
-                  label: 'Return Policy',
-                ),
-                _DrawerSubItem(icon: Icons.help_outline, label: 'Contact Us'),
+                    icon: Icons.assignment_return_outlined,
+                    label: 'Return Policy'),
+                _DrawerSubItem(
+                    icon: Icons.help_outline, label: 'Contact Us'),
               ],
             ),
           ),
@@ -110,13 +108,13 @@ class AppDrawer extends StatelessWidget {
 
           _DrawerItem(
             icon: Icons.exit_to_app,
-            label: 'Sign Out',
+            label: s.signOut,
             color: Colors.redAccent,
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamedAndRemoveUntil(
                 context,
-                '/phone',
+                '/language',
                 (route) => false,
               );
             },
@@ -165,7 +163,6 @@ class _DrawerItem extends StatelessWidget {
 class _DrawerSubItem extends StatelessWidget {
   final IconData icon;
   final String label;
-
   const _DrawerSubItem({required this.icon, required this.label});
 
   @override

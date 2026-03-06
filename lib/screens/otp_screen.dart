@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'package:agrio/l10n/app_localizations.dart';
 
 class OTPScreen extends StatefulWidget {
   final String phoneNumber;
@@ -11,12 +12,9 @@ class OTPScreen extends StatefulWidget {
 }
 
 class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
-  final List<TextEditingController> _controllers = List.generate(
-    4,
-    (_) => TextEditingController(),
-  );
+  final List<TextEditingController> _controllers =
+      List.generate(4, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
-
   final ScrollController _scrollController = ScrollController();
 
   int _resendSeconds = 30;
@@ -25,7 +23,6 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   Timer? _timer;
 
   String _phoneNumber = '';
-  Map<String, String>? _language;
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -40,26 +37,19 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
     super.initState();
 
     _slideController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
+        vsync: this, duration: const Duration(milliseconds: 700));
     _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
+        vsync: this, duration: const Duration(milliseconds: 900));
     _buttonController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
+        vsync: this, duration: const Duration(milliseconds: 150));
 
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-        );
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+    );
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
     );
@@ -69,14 +59,11 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
     _startTimer();
 
     for (int i = 0; i < 4; i++) {
-      _controllers[i].addListener(() => _checkComplete());
+      _controllers[i].addListener(_checkComplete);
     }
-
     for (int i = 0; i < 4; i++) {
       _focusNodes[i].addListener(() {
-        if (_focusNodes[i].hasFocus) {
-          _scrollToBottom();
-        }
+        if (_focusNodes[i].hasFocus) _scrollToBottom();
       });
     }
   }
@@ -87,10 +74,8 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map) {
       _phoneNumber = (args['phone'] as String?) ?? widget.phoneNumber;
-      final langRaw = args['language'];
-      if (langRaw is Map) {
-        _language = langRaw.map((k, v) => MapEntry(k.toString(), v.toString()));
-      }
+    } else {
+      _phoneNumber = widget.phoneNumber;
     }
   }
 
@@ -122,9 +107,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
 
   void _checkComplete() {
     final complete = _controllers.every((c) => c.text.isNotEmpty);
-    if (complete != _isComplete) {
-      setState(() => _isComplete = complete);
-    }
+    if (complete != _isComplete) setState(() => _isComplete = complete);
   }
 
   void _onOtpChanged(int index, String value) {
@@ -152,6 +135,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
     final size = MediaQuery.of(context).size;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final keyboardOpen = bottomInset > 0;
+    final s = AppLocalizations.of(context);
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -165,7 +149,8 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
-              height: keyboardOpen ? size.height * 0.28 : size.height * 0.60,
+              height:
+                  keyboardOpen ? size.height * 0.28 : size.height * 0.60,
               width: double.infinity,
               child: Stack(
                 fit: StackFit.expand,
@@ -194,16 +179,8 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                     top: 48,
                     left: 16,
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          '/phone',
-                          arguments: {
-                            'phone': _phoneNumber,
-                            'language': _language,
-                          },
-                        );
-                      },
+                      onTap: () => Navigator.pushReplacementNamed(
+                          context, '/phone'),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -222,7 +199,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
               ),
             ),
 
-            // ── White card section ──
+            // ── White card ──
             FadeTransition(
               opacity: _fadeAnimation,
               child: SlideTransition(
@@ -236,9 +213,9 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      const Text(
-                        'Enter OTP',
-                        style: TextStyle(
+                      Text(
+                        s.enterOtp,
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF1A1A1A),
@@ -250,11 +227,9 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                       RichText(
                         text: TextSpan(
                           style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF888888),
-                          ),
+                              fontSize: 13, color: Color(0xFF888888)),
                           children: [
-                            const TextSpan(text: 'We sent a 4-digit code to '),
+                            TextSpan(text: s.weSent),
                             TextSpan(
                               text: _phoneNumber,
                               style: const TextStyle(
@@ -272,7 +247,8 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(4, (index) {
                           return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8),
                             child: _OTPBox(
                               controller: _controllers[index],
                               focusNode: _focusNodes[index],
@@ -298,9 +274,9 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                                       _focusNodes[0].requestFocus();
                                       _startTimer();
                                     },
-                                    child: const Text(
-                                      'Resend OTP',
-                                      style: TextStyle(
+                                    child: Text(
+                                      s.resendOtp,
+                                      style: const TextStyle(
                                         fontSize: 13,
                                         color: Color(0xFF2E7D32),
                                         fontWeight: FontWeight.w600,
@@ -310,7 +286,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                                   )
                                 : Text(
                                     key: const ValueKey('timer'),
-                                    'Resend OTP in ${_resendSeconds}s',
+                                    '${s.resendIn}${_resendSeconds}s',
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: Color(0xFF888888),
@@ -329,13 +305,10 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                         onTapCancel: () => _buttonController.reverse(),
                         onTap: _isComplete
                             ? () => Navigator.pushNamed(
-                                context,
-                                '/registration',
-                                arguments: {
-                                  'phone': _phoneNumber,
-                                  'language': _language,
-                                },
-                              )
+                                  context,
+                                  '/registration',
+                                  arguments: {'phone': _phoneNumber},
+                                )
                             : null,
                         child: ScaleTransition(
                           scale: _buttonScaleAnimation,
@@ -360,7 +333,7 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
                                     ? Colors.white
                                     : const Color(0xFFAAAAAA),
                               ),
-                              child: const Text('VERIFY OTP'),
+                              child: Text(s.verifyOtp),
                             ),
                           ),
                         ),
@@ -379,6 +352,9 @@ class _OTPScreenState extends State<OTPScreen> with TickerProviderStateMixin {
   }
 }
 
+// ─────────────────────────────────────────────
+// OTP BOX
+// ─────────────────────────────────────────────
 class _OTPBox extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
@@ -414,16 +390,12 @@ class _OTPBoxState extends State<_OTPBox> {
       width: 64,
       height: 60,
       decoration: BoxDecoration(
-        color: _isFocused
-            ? const Color(0xFFF0F7F0)
-            : filled
+        color: _isFocused || filled
             ? const Color(0xFFF0F7F0)
             : const Color(0xFFF7F7F7),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: _isFocused
-              ? const Color(0xFF2E7D32)
-              : filled
+          color: _isFocused || filled
               ? const Color(0xFF2E7D32)
               : const Color(0xFFDDDDDD),
           width: _isFocused ? 2.0 : 1.5,
@@ -433,8 +405,6 @@ class _OTPBoxState extends State<_OTPBox> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // TextField: handles all input, text made transparent
-            // so we can render our own perfectly-centered Text below.
             SizedBox(
               width: 64,
               height: 60,
@@ -444,9 +414,9 @@ class _OTPBoxState extends State<_OTPBox> {
                 maxLength: 1,
                 keyboardType: TextInputType.number,
                 textAlign: TextAlign.center,
+                textAlignVertical: TextAlignVertical.center,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 style: const TextStyle(
-                  // Transparent — digit is painted by the Text widget below
                   color: Colors.transparent,
                   fontSize: 22,
                   height: 1.0,
@@ -457,14 +427,13 @@ class _OTPBoxState extends State<_OTPBox> {
                   border: InputBorder.none,
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
-                  // Zero padding + isDense removes all extra vertical space
-                  contentPadding: EdgeInsets.zero,
-                  isDense: true,
+                  // contentPadding: EdgeInsets.zero,
+                  isDense: false,
+                  contentPadding: EdgeInsets.symmetric(vertical: 14), 
                 ),
                 onChanged: widget.onChanged,
               ),
             ),
-            // Visible digit — always perfectly centred via Stack + Center
             IgnorePointer(
               child: ValueListenableBuilder<TextEditingValue>(
                 valueListenable: widget.controller,

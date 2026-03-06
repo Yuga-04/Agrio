@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
+import 'package:agrio/l10n/locale_provider.dart';
 
 class RegistrationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -14,8 +16,6 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   String? _selectedDistrict;
   String? _selectedBlock;
   String? _selectedVillage;
-
-  Map<String, String>? _language;
   String _phoneNumber = '';
 
   late AnimationController _slideController;
@@ -24,30 +24,14 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   late Animation<double> _fadeAnimation;
 
   final List<String> _districts = [
-    'Chennai',
-    'Coimbatore',
-    'Madurai',
-    'Tiruchirappalli',
-    'Salem',
-    'Tirunelveli',
-    'Erode',
-    'Vellore',
-    'Thoothukudi',
-    'Dindigul',
+    'Chennai', 'Coimbatore', 'Madurai', 'Tiruchirappalli', 'Salem',
+    'Tirunelveli', 'Erode', 'Vellore', 'Thoothukudi', 'Dindigul',
   ];
   final List<String> _blocks = [
-    'Block 1',
-    'Block 2',
-    'Block 3',
-    'Block 4',
-    'Block 5',
+    'Block 1', 'Block 2', 'Block 3', 'Block 4', 'Block 5',
   ];
   final List<String> _villages = [
-    'Village A',
-    'Village B',
-    'Village C',
-    'Village D',
-    'Village E',
+    'Village A', 'Village B', 'Village C', 'Village D', 'Village E',
   ];
 
   bool get _isFormValid =>
@@ -60,21 +44,16 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   void initState() {
     super.initState();
     _slideController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
+        vsync: this, duration: const Duration(milliseconds: 700));
     _fadeController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
+        vsync: this, duration: const Duration(milliseconds: 900));
     _slideAnimation =
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
-        );
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    );
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+    );
     _slideController.forward();
     _fadeController.forward();
     _nameController.addListener(() => setState(() {}));
@@ -86,10 +65,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     final args = ModalRoute.of(context)?.settings.arguments;
     if (args is Map) {
       _phoneNumber = (args['phone'] as String?) ?? widget.phoneNumber;
-      final langRaw = args['language'];
-      if (langRaw is Map) {
-        _language = langRaw.map((k, v) => MapEntry(k.toString(), v.toString()));
-      }
+    } else {
+      _phoneNumber = widget.phoneNumber;
     }
   }
 
@@ -104,13 +81,14 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final String langLabel =
-        _language?['native'] ?? _language?['name'] ?? 'Language';
+    final s = AppLocalizations.of(context);
+    final langLabel = AppLocale.fromLocale(Localizations.localeOf(context)).native;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
+          // ── Hero image ──
           SizedBox(
             height: size.height * 0.38,
             width: double.infinity,
@@ -137,6 +115,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     ),
                   ),
                 ),
+                // Back button
                 Positioned(
                   top: 48,
                   left: 16,
@@ -144,7 +123,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     onTap: () => Navigator.pushReplacementNamed(
                       context,
                       '/otp',
-                      arguments: {'phone': _phoneNumber, 'language': _language},
+                      arguments: {'phone': _phoneNumber},
                     ),
                     child: Container(
                       padding: const EdgeInsets.all(8),
@@ -160,25 +139,21 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     ),
                   ),
                 ),
+                // Language chip
                 Positioned(
                   top: 48,
                   right: 16,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+                        horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.language,
-                          size: 16,
-                          color: Color(0xFF2E7D32),
-                        ),
+                        const Icon(Icons.language,
+                            size: 16, color: Color(0xFF2E7D32)),
                         const SizedBox(width: 4),
                         Text(
                           langLabel,
@@ -192,6 +167,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                     ),
                   ),
                 ),
+                // App name
                 Positioned(
                   bottom: size.height * 0.07,
                   left: 24,
@@ -204,10 +180,9 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                       letterSpacing: -0.5,
                       shadows: [
                         Shadow(
-                          color: Colors.black26,
-                          blurRadius: 8,
-                          offset: Offset(0, 2),
-                        ),
+                            color: Colors.black26,
+                            blurRadius: 8,
+                            offset: Offset(0, 2))
                       ],
                     ),
                   ),
@@ -215,6 +190,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
               ],
             ),
           ),
+
+          // ── Form ──
           Expanded(
             child: FadeTransition(
               opacity: _fadeAnimation,
@@ -229,9 +206,9 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                       children: [
                         Row(
                           children: [
-                            const Text(
-                              'One-time\nRegistration',
-                              style: TextStyle(
+                            Text(
+                              s.oneTimeReg,
+                              style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
                                 color: Color(0xFF1A1A1A),
@@ -242,20 +219,15 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                             const Spacer(),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
+                                  horizontal: 10, vertical: 5),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFE8F5E9),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: const Row(
                                 children: [
-                                  Icon(
-                                    Icons.verified_user_outlined,
-                                    size: 14,
-                                    color: Color(0xFF2E7D32),
-                                  ),
+                                  Icon(Icons.verified_user_outlined,
+                                      size: 14, color: Color(0xFF2E7D32)),
                                   SizedBox(width: 4),
                                   Text(
                                     'New User',
@@ -271,44 +243,40 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                           ],
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'Fill in your details to get started',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF888888),
-                          ),
+                        Text(
+                          s.fillDetails,
+                          style: const TextStyle(
+                              fontSize: 13, color: Color(0xFF888888)),
                         ),
                         const SizedBox(height: 20),
-                        _buildLabel('Full Name'),
+
+                        _buildLabel(s.fullName),
                         const SizedBox(height: 6),
                         _buildTextField(
                           controller: _nameController,
-                          hint: 'Enter your full name',
+                          hint: s.enterFullName,
                           icon: Icons.person_outline_rounded,
                         ),
                         const SizedBox(height: 14),
-                        _buildLabel('Mobile Number'),
+
+                        _buildLabel(s.mobileNumber),
                         const SizedBox(height: 6),
                         Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFFF0F7F0),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: const Color(0xFF2E7D32).withOpacity(0.3),
+                              color:
+                                  const Color(0xFF2E7D32).withOpacity(0.3),
                               width: 1.5,
                             ),
                           ),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 15,
-                          ),
+                              horizontal: 16, vertical: 15),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.phone_outlined,
-                                size: 18,
-                                color: Color(0xFF2E7D32),
-                              ),
+                              const Icon(Icons.phone_outlined,
+                                  size: 18, color: Color(0xFF2E7D32)),
                               const SizedBox(width: 10),
                               Text(
                                 _phoneNumber,
@@ -320,19 +288,17 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                 ),
                               ),
                               const Spacer(),
-                              const Icon(
-                                Icons.lock_outline_rounded,
-                                size: 15,
-                                color: Color(0xFF888888),
-                              ),
+                              const Icon(Icons.lock_outline_rounded,
+                                  size: 15, color: Color(0xFF888888)),
                             ],
                           ),
                         ),
                         const SizedBox(height: 14),
-                        _buildLabel('District'),
+
+                        _buildLabel(s.district),
                         const SizedBox(height: 6),
                         _buildDropdown(
-                          hint: 'Select your district',
+                          hint: s.selectDistrict,
                           icon: Icons.location_city_outlined,
                           value: _selectedDistrict,
                           items: _districts,
@@ -340,42 +306,47 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                               setState(() => _selectedDistrict = val),
                         ),
                         const SizedBox(height: 14),
-                        _buildLabel('Block'),
+
+                        _buildLabel(s.block),
                         const SizedBox(height: 6),
                         _buildDropdown(
-                          hint: 'Select your block',
+                          hint: s.selectBlock,
                           icon: Icons.map_outlined,
                           value: _selectedBlock,
                           items: _blocks,
                           onChanged: _selectedDistrict != null
-                              ? (val) => setState(() => _selectedBlock = val)
+                              ? (val) =>
+                                  setState(() => _selectedBlock = val)
                               : null,
                           disabled: _selectedDistrict == null,
                         ),
                         const SizedBox(height: 14),
-                        _buildLabel('Village'),
+
+                        _buildLabel(s.village),
                         const SizedBox(height: 6),
                         _buildDropdown(
-                          hint: 'Select your village',
+                          hint: s.selectVillage,
                           icon: Icons.holiday_village_outlined,
                           value: _selectedVillage,
                           items: _villages,
                           onChanged: _selectedBlock != null
-                              ? (val) => setState(() => _selectedVillage = val)
+                              ? (val) =>
+                                  setState(() => _selectedVillage = val)
                               : null,
                           disabled: _selectedBlock == null,
                         ),
                         const SizedBox(height: 24),
+
                         GestureDetector(
                           onTap: _isFormValid
                               ? () => Navigator.pushNamed(
-                                  context,
-                                  '/home',
-                                  arguments: {
-                                    'name': _nameController.text
-                                        .trim(), // ← KEY FIX
-                                  },
-                                )
+                                    context,
+                                    '/home',
+                                    arguments: {
+                                      'name':
+                                          _nameController.text.trim(),
+                                    },
+                                  )
                               : null,
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
@@ -398,7 +369,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                                     ? Colors.white
                                     : const Color(0xFFAAAAAA),
                               ),
-                              child: const Text('SUBMIT'),
+                              child: Text(s.submit),
                             ),
                           ),
                         ),
@@ -415,14 +386,14 @@ class _RegistrationScreenState extends State<RegistrationScreen>
   }
 
   Widget _buildLabel(String text) => Text(
-    text,
-    style: const TextStyle(
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      color: Color(0xFF444444),
-      letterSpacing: 0.2,
-    ),
-  );
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF444444),
+          letterSpacing: 0.2,
+        ),
+      );
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -444,23 +415,20 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       child: TextField(
         controller: controller,
         style: const TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFF1A1A1A),
-        ),
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF1A1A1A)),
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: const TextStyle(
-            color: Color(0xFFBBBBBB),
-            fontWeight: FontWeight.w400,
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(icon, size: 18, color: const Color(0xFF888888)),
+              color: Color(0xFFBBBBBB),
+              fontWeight: FontWeight.w400,
+              fontSize: 14),
+          prefixIcon:
+              Icon(icon, size: 18, color: const Color(0xFF888888)),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 15,
-          ),
+              horizontal: 16, vertical: 15),
         ),
       ),
     );
@@ -474,15 +442,12 @@ class _RegistrationScreenState extends State<RegistrationScreen>
     required ValueChanged<String?>? onChanged,
     bool disabled = false,
   }) {
-    final Color iconColor = disabled
-        ? const Color(0xFFCCCCCC)
-        : const Color(0xFF888888);
-    final Color hintColor = disabled
-        ? const Color(0xFFCCCCCC)
-        : const Color(0xFFBBBBBB);
-    final Color bgColor = disabled
-        ? const Color(0xFFF0F0F0)
-        : const Color(0xFFF7F7F7);
+    final Color iconColor =
+        disabled ? const Color(0xFFCCCCCC) : const Color(0xFF888888);
+    final Color hintColor =
+        disabled ? const Color(0xFFCCCCCC) : const Color(0xFFBBBBBB);
+    final Color bgColor =
+        disabled ? const Color(0xFFF0F0F0) : const Color(0xFFF7F7F7);
     final Color borderColor = value != null
         ? const Color(0xFF2E7D32).withOpacity(0.5)
         : Colors.transparent;
@@ -497,9 +462,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
       ),
       child: Theme(
         data: Theme.of(context).copyWith(
-          inputDecorationTheme: const InputDecorationTheme(
-            border: InputBorder.none,
-          ),
+          inputDecorationTheme:
+              const InputDecorationTheme(border: InputBorder.none),
         ),
         child: DropdownButtonHideUnderline(
           child: ButtonTheme(
@@ -509,11 +473,8 @@ class _RegistrationScreenState extends State<RegistrationScreen>
               isExpanded: true,
               icon: Padding(
                 padding: const EdgeInsets.only(right: 4),
-                child: Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: iconColor,
-                  size: 22,
-                ),
+                child: Icon(Icons.keyboard_arrow_down_rounded,
+                    color: iconColor, size: 22),
               ),
               onChanged: disabled ? null : onChanged,
               dropdownColor: Colors.white,
@@ -526,38 +487,35 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                   Text(
                     hint,
                     style: TextStyle(
-                      color: hintColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                    ),
+                        color: hintColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400),
                   ),
                 ],
               ),
               selectedItemBuilder: value == null
                   ? null
                   : (context) => items
-                        .map(
-                          (item) => Row(
-                            children: [
-                              const SizedBox(width: 12),
-                              Icon(
-                                icon,
+                      .map(
+                        (item) => Row(
+                          children: [
+                            const SizedBox(width: 12),
+                            Icon(icon,
                                 size: 18,
-                                color: const Color(0xFF2E7D32),
+                                color: const Color(0xFF2E7D32)),
+                            const SizedBox(width: 10),
+                            Text(
+                              item,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF1A1A1A),
                               ),
-                              const SizedBox(width: 10),
-                              Text(
-                                item,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Color(0xFF1A1A1A),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                        .toList(),
+                            ),
+                          ],
+                        ),
+                      )
+                      .toList(),
               items: items
                   .map(
                     (item) => DropdownMenuItem(
@@ -565,10 +523,9 @@ class _RegistrationScreenState extends State<RegistrationScreen>
                       child: Text(
                         item,
                         style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF1A1A1A),
-                          fontWeight: FontWeight.w500,
-                        ),
+                            fontSize: 14,
+                            color: Color(0xFF1A1A1A),
+                            fontWeight: FontWeight.w500),
                       ),
                     ),
                   )

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
 import 'app_drawer.dart';
 import 'order_screen.dart';
 import 'kisan_vani_screen.dart';
@@ -15,12 +16,11 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
 
-  late final List<Widget> _bodies;
-
   @override
-  void initState() {
-    super.initState();
-    _bodies = [
+  Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
+
+    final bodies = [
       _HomeBody(
         onAvatarTap: () => _scaffoldKey.currentState?.openDrawer(),
         userName: widget.userName,
@@ -28,10 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const OrderScreen(),
       const KisanVaniScreen(),
     ];
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFFF5F5F5),
@@ -52,26 +49,26 @@ class _HomeScreenState extends State<HomeScreen> {
             fontWeight: FontWeight.w600,
           ),
           unselectedLabelStyle: const TextStyle(fontSize: 11),
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home),
+              label: s.home,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart_outlined),
-              activeIcon: Icon(Icons.shopping_cart),
-              label: 'Orders',
+              icon: const Icon(Icons.shopping_cart_outlined),
+              activeIcon: const Icon(Icons.shopping_cart),
+              label: s.orders,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.campaign_outlined),
-              activeIcon: Icon(Icons.campaign),
-              label: 'Kisan Vani',
+              icon: const Icon(Icons.campaign_outlined),
+              activeIcon: const Icon(Icons.campaign),
+              label: s.kisanVani,
             ),
           ],
         ),
       ),
-      body: IndexedStack(index: _currentIndex, children: _bodies),
+      body: IndexedStack(index: _currentIndex, children: bodies),
     );
   }
 }
@@ -115,19 +112,18 @@ class _TopBar extends StatelessWidget {
   final String userName;
   const _TopBar({required this.onAvatarTap, required this.userName});
 
-  // Hard-coded unread count — replace with your state/provider later
   static const int _unreadCount = 3;
 
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
     final displayName = userName.isNotEmpty ? userName : 'Farmer';
+    final s = AppLocalizations.of(context);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(20, top + 14, 20, 0),
       child: Row(
         children: [
-          // Avatar + greeting — opens drawer
           GestureDetector(
             onTap: onAvatarTap,
             child: Row(
@@ -153,9 +149,9 @@ class _TopBar extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Good Morning 👋',
-                      style: TextStyle(
+                    Text(
+                      s.goodMorning,
+                      style: const TextStyle(
                         fontSize: 11,
                         color: Color(0xFF888888),
                         fontWeight: FontWeight.w400,
@@ -175,9 +171,7 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
-
           const Spacer(),
-
           // Coins chip
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -188,7 +182,8 @@ class _TopBar extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.monetization_on, color: Color(0xFFFF8C00), size: 15),
+                Icon(Icons.monetization_on,
+                    color: Color(0xFFFF8C00), size: 15),
                 SizedBox(width: 4),
                 Text(
                   '50',
@@ -201,10 +196,8 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
-          // Notification bell with badge — navigates to /notifications
+          // Notification bell
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/notification'),
             child: Stack(
@@ -227,10 +220,8 @@ class _TopBar extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(width: 8),
-
-          // Cart icon
+          // Cart
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/cart'),
             child: Stack(
@@ -296,6 +287,7 @@ class _SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -313,16 +305,16 @@ class _SearchBar extends StatelessWidget {
           ],
         ),
         child: Row(
-          children: const [
-            SizedBox(width: 14),
-            Icon(Icons.search, color: Color(0xFF888888), size: 20),
-            SizedBox(width: 8),
+          children: [
+            const SizedBox(width: 14),
+            const Icon(Icons.search, color: Color(0xFF888888), size: 20),
+            const SizedBox(width: 8),
             Expanded(
               child: TextField(
-                style: TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
                 decoration: InputDecoration(
-                  hintText: 'Search products, crops...',
-                  hintStyle: TextStyle(
+                  hintText: s.searchHint,
+                  hintStyle: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFFAAAAAA),
                     fontWeight: FontWeight.w400,
@@ -332,7 +324,7 @@ class _SearchBar extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(width: 14),
+            const SizedBox(width: 14),
           ],
         ),
       ),
@@ -357,14 +349,15 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            'Categories',
-            style: TextStyle(
+            s.categories,
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1A1A1A),
@@ -432,25 +425,22 @@ class _ToolsAndServices extends StatelessWidget {
     {'label': 'Weather', 'icon': Icons.cloud_outlined, 'isNew': false},
     {'label': 'Mandi\nPrice', 'icon': Icons.trending_up, 'isNew': false},
     {'label': 'Crop\nCare', 'icon': Icons.eco_outlined, 'isNew': false},
-    {
-      'label': 'Fertilizer\nCalc',
-      'icon': Icons.calculate_outlined,
-      'isNew': false,
-    },
+    {'label': 'Fertilizer\nCalc', 'icon': Icons.calculate_outlined, 'isNew': false},
     {'label': 'Protection', 'icon': Icons.shield_outlined, 'isNew': false},
     {'label': 'Bazaar', 'icon': Icons.storefront_outlined, 'isNew': false},
   ];
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Tools & Services',
-            style: TextStyle(
+          Text(
+            s.toolsServices,
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1A1A1A),
@@ -458,9 +448,9 @@ class _ToolsAndServices extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          const Text(
-            'Smart solutions at your fingertips',
-            style: TextStyle(fontSize: 11, color: Color(0xFF888888)),
+          Text(
+            s.smartSolutions,
+            style: const TextStyle(fontSize: 11, color: Color(0xFF888888)),
           ),
           const SizedBox(height: 14),
           GridView.builder(
@@ -587,6 +577,7 @@ class _MandiPriceSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -596,30 +587,31 @@ class _MandiPriceSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Mandi Price',
-                    style: TextStyle(
+                    s.mandiPrice,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF1A1A1A),
                       letterSpacing: -0.3,
                     ),
                   ),
-                  SizedBox(height: 1),
+                  const SizedBox(height: 1),
                   Text(
-                    'Live crop prices at a glance',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF888888)),
+                    s.livePrices,
+                    style: const TextStyle(
+                        fontSize: 11, color: Color(0xFF888888)),
                   ),
                 ],
               ),
               GestureDetector(
                 onTap: () {},
-                child: const Text(
-                  'View All',
-                  style: TextStyle(
+                child: Text(
+                  s.viewAll,
+                  style: const TextStyle(
                     color: Color(0xFF2E7D32),
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
@@ -664,7 +656,8 @@ class _MandiPriceSection extends StatelessWidget {
                           width: 38,
                           height: 38,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF2E7D32).withOpacity(0.07),
+                            color:
+                                const Color(0xFF2E7D32).withOpacity(0.07),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(

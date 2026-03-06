@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
 
 class PaymentScreen extends StatefulWidget {
   final int totalAmount;
@@ -20,7 +21,7 @@ enum _PayState { select, confirming, success }
 
 class _PaymentScreenState extends State<PaymentScreen>
     with SingleTickerProviderStateMixin {
-  int _selectedMethod = 2; // 0 = UPI, 1 = Card, 2 = COD (default)
+  int _selectedMethod = 2;
   _PayState _payState = _PayState.select;
   bool _agreedToTerms = true;
 
@@ -32,14 +33,11 @@ class _PaymentScreenState extends State<PaymentScreen>
   void initState() {
     super.initState();
     _successCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 700),
-    );
-    _successScale = CurvedAnimation(
-      parent: _successCtrl,
-      curve: Curves.elasticOut,
-    );
-    _successFade = CurvedAnimation(parent: _successCtrl, curve: Curves.easeIn);
+        vsync: this, duration: const Duration(milliseconds: 700));
+    _successScale =
+        CurvedAnimation(parent: _successCtrl, curve: Curves.elasticOut);
+    _successFade =
+        CurvedAnimation(parent: _successCtrl, curve: Curves.easeIn);
   }
 
   @override
@@ -68,28 +66,29 @@ class _PaymentScreenState extends State<PaymentScreen>
         switchInCurve: Curves.easeOut,
         child: switch (_payState) {
           _PayState.select => _SelectView(
-            key: const ValueKey('select'),
-            totalAmount: widget.totalAmount,
-            itemCount: widget.itemCount,
-            savings: widget.savings,
-            selectedMethod: _selectedMethod,
-            agreedToTerms: _agreedToTerms,
-            onMethodChanged: (v) => setState(() => _selectedMethod = v),
-            onTermsChanged: (v) => setState(() => _agreedToTerms = v ?? true),
-            onPlaceOrder: _placeOrder,
-          ),
+              key: const ValueKey('select'),
+              totalAmount: widget.totalAmount,
+              itemCount: widget.itemCount,
+              savings: widget.savings,
+              selectedMethod: _selectedMethod,
+              agreedToTerms: _agreedToTerms,
+              onMethodChanged: (v) => setState(() => _selectedMethod = v),
+              onTermsChanged: (v) =>
+                  setState(() => _agreedToTerms = v ?? true),
+              onPlaceOrder: _placeOrder,
+            ),
           _PayState.confirming => _ConfirmingView(
-            key: const ValueKey('confirming'),
-            totalAmount: widget.totalAmount,
-          ),
+              key: const ValueKey('confirming'),
+              totalAmount: widget.totalAmount,
+            ),
           _PayState.success => _SuccessView(
-            key: const ValueKey('success'),
-            totalAmount: widget.totalAmount,
-            itemCount: widget.itemCount,
-            savings: widget.savings,
-            scaleAnim: _successScale,
-            fadeAnim: _successFade,
-          ),
+              key: const ValueKey('success'),
+              totalAmount: widget.totalAmount,
+              itemCount: widget.itemCount,
+              savings: widget.savings,
+              scaleAnim: _successScale,
+              fadeAnim: _successFade,
+            ),
         },
       ),
     );
@@ -100,10 +99,7 @@ class _PaymentScreenState extends State<PaymentScreen>
 // SELECT VIEW
 // ─────────────────────────────────────────────
 class _SelectView extends StatelessWidget {
-  final int totalAmount;
-  final int itemCount;
-  final int savings;
-  final int selectedMethod;
+  final int totalAmount, itemCount, savings, selectedMethod;
   final bool agreedToTerms;
   final ValueChanged<int> onMethodChanged;
   final ValueChanged<bool?> onTermsChanged;
@@ -125,27 +121,24 @@ class _SelectView extends StatelessWidget {
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
     final bottom = MediaQuery.of(context).padding.bottom;
+    final s = AppLocalizations.of(context);
 
     return Column(
       children: [
-        // ── App Bar ──
         Container(
           color: Colors.white,
           padding: EdgeInsets.fromLTRB(4, top + 6, 16, 10),
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Color(0xFF1A1A1A),
-                  size: 22,
-                ),
+                icon: const Icon(Icons.arrow_back,
+                    color: Color(0xFF1A1A1A), size: 22),
                 onPressed: () => Navigator.of(context).pop(),
               ),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Checkout',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF1A1A1A),
@@ -154,21 +147,16 @@ class _SelectView extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE8F5E9),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Row(
                   children: [
-                    Icon(
-                      Icons.lock_outline,
-                      color: Color(0xFF2E7D32),
-                      size: 13,
-                    ),
+                    Icon(Icons.lock_outline,
+                        color: Color(0xFF2E7D32), size: 13),
                     SizedBox(width: 4),
                     Text(
                       'Secure',
@@ -188,18 +176,17 @@ class _SelectView extends StatelessWidget {
 
         Expanded(
           child: ListView(
-            padding: EdgeInsets.fromLTRB(16, 14, 16, 16 + bottom),
+            padding:
+                EdgeInsets.fromLTRB(16, 14, 16, 16 + bottom),
             physics: const BouncingScrollPhysics(),
             children: [
               _OrderSummaryCard(
-                totalAmount: totalAmount,
-                itemCount: itemCount,
-                savings: savings,
-              ),
+                  totalAmount: totalAmount,
+                  itemCount: itemCount,
+                  savings: savings),
               const SizedBox(height: 16),
               const _DeliveryAddressCard(),
               const SizedBox(height: 16),
-
               const Text(
                 'Payment Method',
                 style: TextStyle(
@@ -210,7 +197,6 @@ class _SelectView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-
               _PayMethodTile(
                 icon: Icons.account_balance_wallet_outlined,
                 iconBg: const Color(0xFFE8F0FE),
@@ -243,15 +229,11 @@ class _SelectView extends StatelessWidget {
                 badge: 'Available',
                 onTap: () => onMethodChanged(2),
               ),
-
               if (selectedMethod == 2) ...[
                 const SizedBox(height: 10),
                 const _CodInfoCard(),
               ],
-
               const SizedBox(height: 16),
-
-              // Terms checkbox
               GestureDetector(
                 onTap: () => onTermsChanged(!agreedToTerms),
                 child: Row(
@@ -275,11 +257,8 @@ class _SelectView extends StatelessWidget {
                         ),
                       ),
                       child: agreedToTerms
-                          ? const Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 13,
-                            )
+                          ? const Icon(Icons.check,
+                              color: Colors.white, size: 13)
                           : null,
                     ),
                     const SizedBox(width: 10),
@@ -301,14 +280,12 @@ class _SelectView extends StatelessWidget {
           ),
         ),
 
-        // ── Place Order Bar ──
         Container(
           padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottom),
           decoration: BoxDecoration(
             color: Colors.white,
             border: const Border(
-              top: BorderSide(color: Color(0xFFEEEEEE), width: 1),
-            ),
+                top: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.04),
@@ -334,7 +311,8 @@ class _SelectView extends StatelessWidget {
                   ),
                   const Text(
                     'Total payable',
-                    style: TextStyle(fontSize: 10, color: Color(0xFF888888)),
+                    style: TextStyle(
+                        fontSize: 10, color: Color(0xFF888888)),
                   ),
                 ],
               ),
@@ -351,18 +329,15 @@ class _SelectView extends StatelessWidget {
                           : const Color(0xFFBDBDBD),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.local_shipping_outlined,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                        SizedBox(width: 8),
+                        const Icon(Icons.local_shipping_outlined,
+                            color: Colors.white, size: 18),
+                        const SizedBox(width: 8),
                         Text(
-                          'Place Order',
-                          style: TextStyle(
+                          s.placeOrder,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -401,9 +376,9 @@ class _ConfirmingViewState extends State<_ConfirmingView>
   void initState() {
     super.initState();
     _dotCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    )..repeat();
+        vsync: this,
+        duration: const Duration(milliseconds: 900))
+      ..repeat();
   }
 
   @override
@@ -428,11 +403,8 @@ class _ConfirmingViewState extends State<_ConfirmingView>
                   color: const Color(0xFF2E7D32).withOpacity(0.08),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.local_shipping_outlined,
-                  color: Color(0xFF2E7D32),
-                  size: 42,
-                ),
+                child: const Icon(Icons.local_shipping_outlined,
+                    color: Color(0xFF2E7D32), size: 42),
               ),
               const SizedBox(height: 24),
               const Text(
@@ -447,7 +419,8 @@ class _ConfirmingViewState extends State<_ConfirmingView>
               const SizedBox(height: 6),
               Text(
                 '₹${widget.totalAmount} · Cash on Delivery',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF888888)),
+                style: const TextStyle(
+                    fontSize: 13, color: Color(0xFF888888)),
               ),
               const SizedBox(height: 28),
               AnimatedBuilder(
@@ -457,11 +430,17 @@ class _ConfirmingViewState extends State<_ConfirmingView>
                     mainAxisSize: MainAxisSize.min,
                     children: List.generate(3, (i) {
                       final delay = i / 3;
-                      final t = ((_dotCtrl.value - delay + 1) % 1.0);
-                      final scale =
-                          0.6 + 0.4 * (1 - (t * 2 - 1).abs().clamp(0.0, 1.0));
+                      final t =
+                          ((_dotCtrl.value - delay + 1) % 1.0);
+                      final scale = 0.6 +
+                          0.4 *
+                              (1 -
+                                  (t * 2 - 1)
+                                      .abs()
+                                      .clamp(0.0, 1.0));
                       return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 4),
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
@@ -472,7 +451,8 @@ class _ConfirmingViewState extends State<_ConfirmingView>
                           ),
                           shape: BoxShape.circle,
                         ),
-                        transform: Matrix4.identity()..scale(scale, scale),
+                        transform: Matrix4.identity()
+                          ..scale(scale, scale),
                         transformAlignment: Alignment.center,
                       );
                     }),
@@ -491,11 +471,8 @@ class _ConfirmingViewState extends State<_ConfirmingView>
 // SUCCESS VIEW
 // ─────────────────────────────────────────────
 class _SuccessView extends StatelessWidget {
-  final int totalAmount;
-  final int itemCount;
-  final int savings;
-  final Animation<double> scaleAnim;
-  final Animation<double> fadeAnim;
+  final int totalAmount, itemCount, savings;
+  final Animation<double> scaleAnim, fadeAnim;
 
   const _SuccessView({
     super.key,
@@ -509,6 +486,7 @@ class _SuccessView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.of(context).padding.bottom;
+    final s = AppLocalizations.of(context);
     final orderId =
         '#AGR${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
 
@@ -522,8 +500,6 @@ class _SuccessView extends StatelessWidget {
             child: Column(
               children: [
                 const Spacer(),
-
-                // Success checkmark
                 ScaleTransition(
                   scale: scaleAnim,
                   child: Stack(
@@ -533,7 +509,8 @@ class _SuccessView extends StatelessWidget {
                         width: 120,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2E7D32).withOpacity(0.08),
+                          color: const Color(0xFF2E7D32)
+                              .withOpacity(0.08),
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -544,20 +521,16 @@ class _SuccessView extends StatelessWidget {
                           color: Color(0xFF2E7D32),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          color: Colors.white,
-                          size: 50,
-                        ),
+                        child: const Icon(Icons.check_rounded,
+                            color: Colors.white, size: 50),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-                const Text(
-                  'Order Placed! 🎉',
-                  style: TextStyle(
+                Text(
+                  s.orderPlaced,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF1A1A1A),
@@ -573,31 +546,31 @@ class _SuccessView extends StatelessWidget {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-
                 const SizedBox(height: 28),
-
-                // Receipt card
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(18),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF8F8F8),
                     borderRadius: BorderRadius.circular(18),
-                    border: Border.all(color: const Color(0xFFEEEEEE)),
+                    border:
+                        Border.all(color: const Color(0xFFEEEEEE)),
                   ),
                   child: Column(
                     children: [
                       _ReceiptRow(
                         label: 'Items',
-                        value: '$itemCount item${itemCount > 1 ? 's' : ''}',
+                        value:
+                            '$itemCount item${itemCount > 1 ? 's' : ''}',
                       ),
                       const SizedBox(height: 10),
                       _ReceiptRow(
-                        label: 'Amount to Pay',
-                        value: '₹$totalAmount',
-                      ),
+                          label: 'Amount to Pay',
+                          value: '₹$totalAmount'),
                       const SizedBox(height: 10),
-                      _ReceiptRow(label: 'Payment', value: 'Cash on Delivery'),
+                      _ReceiptRow(
+                          label: 'Payment',
+                          value: 'Cash on Delivery'),
                       const SizedBox(height: 10),
                       _ReceiptRow(
                         label: 'Estimated Delivery',
@@ -607,25 +580,23 @@ class _SuccessView extends StatelessWidget {
                       if (savings > 0) ...[
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(height: 1, color: Color(0xFFEEEEEE)),
+                          child: Divider(
+                              height: 1,
+                              color: Color(0xFFEEEEEE)),
                         ),
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: const Color(0xFFE8F5E9),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             children: [
-                              const Icon(
-                                Icons.savings_outlined,
-                                color: Color(0xFF2E7D32),
-                                size: 14,
-                              ),
+                              const Icon(Icons.savings_outlined,
+                                  color: Color(0xFF2E7D32),
+                                  size: 14),
                               const SizedBox(width: 6),
                               Text(
                                 'You saved ₹$savings on this order!',
@@ -642,27 +613,20 @@ class _SuccessView extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // COD reminder
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 11,
-                  ),
+                      horizontal: 16, vertical: 11),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF8E1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFFFECB3)),
+                    border:
+                        Border.all(color: const Color(0xFFFFECB3)),
                   ),
                   child: const Row(
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Color(0xFFFF8C00),
-                        size: 16,
-                      ),
+                      Icon(Icons.info_outline,
+                          color: Color(0xFFFF8C00), size: 16),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -677,11 +641,11 @@ class _SuccessView extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const Spacer(),
                 const Text(
                   'Redirecting to home...',
-                  style: TextStyle(fontSize: 11, color: Color(0xFFAAAAAA)),
+                  style: TextStyle(
+                      fontSize: 11, color: Color(0xFFAAAAAA)),
                 ),
               ],
             ),
@@ -693,18 +657,14 @@ class _SuccessView extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-// ORDER SUMMARY CARD
+// SHARED WIDGETS
 // ─────────────────────────────────────────────
 class _OrderSummaryCard extends StatelessWidget {
-  final int totalAmount;
-  final int itemCount;
-  final int savings;
-
-  const _OrderSummaryCard({
-    required this.totalAmount,
-    required this.itemCount,
-    required this.savings,
-  });
+  final int totalAmount, itemCount, savings;
+  const _OrderSummaryCard(
+      {required this.totalAmount,
+      required this.itemCount,
+      required this.savings});
 
   @override
   Widget build(BuildContext context) {
@@ -727,20 +687,16 @@ class _OrderSummaryCard extends StatelessWidget {
                   color: const Color(0xFF2E7D32).withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
-                  Icons.receipt_long_outlined,
-                  color: Color(0xFF2E7D32),
-                  size: 18,
-                ),
+                child: const Icon(Icons.receipt_long_outlined,
+                    color: Color(0xFF2E7D32), size: 18),
               ),
               const SizedBox(width: 10),
               const Text(
                 'Order Summary',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A1A),
-                ),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1A1A)),
               ),
             ],
           ),
@@ -750,10 +706,9 @@ class _OrderSummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '$itemCount item${itemCount > 1 ? 's' : ''}',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF666666)),
-              ),
+              Text('$itemCount item${itemCount > 1 ? 's' : ''}',
+                  style: const TextStyle(
+                      fontSize: 13, color: Color(0xFF666666))),
               Text(
                 '₹$totalAmount',
                 style: const TextStyle(
@@ -768,7 +723,8 @@ class _OrderSummaryCard extends StatelessWidget {
           if (savings > 0) ...[
             const SizedBox(height: 8),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: const Color(0xFFE8F5E9),
                 borderRadius: BorderRadius.circular(8),
@@ -776,11 +732,8 @@ class _OrderSummaryCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.savings_outlined,
-                    color: Color(0xFF2E7D32),
-                    size: 14,
-                  ),
+                  const Icon(Icons.savings_outlined,
+                      color: Color(0xFF2E7D32), size: 14),
                   const SizedBox(width: 5),
                   Text(
                     'Saving ₹$savings on this order',
@@ -800,9 +753,6 @@ class _OrderSummaryCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// DELIVERY ADDRESS CARD
-// ─────────────────────────────────────────────
 class _DeliveryAddressCard extends StatelessWidget {
   const _DeliveryAddressCard();
 
@@ -824,11 +774,8 @@ class _DeliveryAddressCard extends StatelessWidget {
               color: const Color(0xFF2E7D32).withOpacity(0.08),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.location_on_outlined,
-              color: Color(0xFF2E7D32),
-              size: 20,
-            ),
+            child: const Icon(Icons.location_on_outlined,
+                color: Color(0xFF2E7D32), size: 20),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -838,37 +785,34 @@ class _DeliveryAddressCard extends StatelessWidget {
                 Text(
                   'Delivery Address',
                   style: TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF888888),
-                    fontWeight: FontWeight.w500,
-                  ),
+                      fontSize: 11,
+                      color: Color(0xFF888888),
+                      fontWeight: FontWeight.w500),
                 ),
                 SizedBox(height: 2),
                 Text(
                   'Survey No. 14, Theni Main Road',
                   style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A1A),
-                  ),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1A1A)),
                 ),
                 Text(
                   'Devaram, Theni – 625 531, Tamil Nadu',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF666666)),
+                  style: TextStyle(
+                      fontSize: 11, color: Color(0xFF666666)),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Color(0xFFCCCCCC), size: 20),
+          const Icon(Icons.chevron_right,
+              color: Color(0xFFCCCCCC), size: 20),
         ],
       ),
     );
   }
 }
 
-// ─────────────────────────────────────────────
-// COD INFO CARD
-// ─────────────────────────────────────────────
 class _CodInfoCard extends StatelessWidget {
   const _CodInfoCard();
 
@@ -884,19 +828,16 @@ class _CodInfoCard extends StatelessWidget {
       child: const Column(
         children: [
           _CodPoint(
-            icon: Icons.payments_outlined,
-            text: 'Pay in cash when your order is delivered.',
-          ),
+              icon: Icons.payments_outlined,
+              text: 'Pay in cash when your order is delivered.'),
           SizedBox(height: 10),
           _CodPoint(
-            icon: Icons.access_time_outlined,
-            text: 'Expected delivery in 3–5 business days.',
-          ),
+              icon: Icons.access_time_outlined,
+              text: 'Expected delivery in 3–5 business days.'),
           SizedBox(height: 10),
           _CodPoint(
-            icon: Icons.swap_horiz_outlined,
-            text: 'Easy returns within 7 days of delivery.',
-          ),
+              icon: Icons.swap_horiz_outlined,
+              text: 'Easy returns within 7 days of delivery.'),
         ],
       ),
     );
@@ -916,29 +857,21 @@ class _CodPoint extends StatelessWidget {
         Icon(icon, color: const Color(0xFFFF8C00), size: 16),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF7A5500),
-              height: 1.4,
-            ),
-          ),
+          child: Text(text,
+              style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF7A5500),
+                  height: 1.4)),
         ),
       ],
     );
   }
 }
 
-// ─────────────────────────────────────────────
-// PAYMENT METHOD TILE
-// ─────────────────────────────────────────────
 class _PayMethodTile extends StatelessWidget {
   final IconData icon;
-  final Color iconBg;
-  final Color iconColor;
-  final String label;
-  final String subtitle;
+  final Color iconBg, iconColor;
+  final String label, subtitle;
   final bool selected;
   final String? badge;
   final VoidCallback onTap;
@@ -960,12 +893,15 @@ class _PayMethodTile extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? const Color(0xFF2E7D32) : const Color(0xFFEEEEEE),
+            color: selected
+                ? const Color(0xFF2E7D32)
+                : const Color(0xFFEEEEEE),
             width: selected ? 2 : 1,
           ),
         ),
@@ -999,9 +935,7 @@ class _PayMethodTile extends StatelessWidget {
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 2,
-                          ),
+                              horizontal: 7, vertical: 2),
                           decoration: BoxDecoration(
                             color: const Color(0xFF2E7D32),
                             borderRadius: BorderRadius.circular(5),
@@ -1019,13 +953,9 @@ class _PayMethodTile extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF888888),
-                    ),
-                  ),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          fontSize: 11, color: Color(0xFF888888))),
                 ],
               ),
             ),
@@ -1035,7 +965,9 @@ class _PayMethodTile extends StatelessWidget {
               height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: selected ? const Color(0xFF2E7D32) : Colors.transparent,
+                color: selected
+                    ? const Color(0xFF2E7D32)
+                    : Colors.transparent,
                 border: Border.all(
                   color: selected
                       ? const Color(0xFF2E7D32)
@@ -1044,7 +976,8 @@ class _PayMethodTile extends StatelessWidget {
                 ),
               ),
               child: selected
-                  ? const Icon(Icons.check, color: Colors.white, size: 13)
+                  ? const Icon(Icons.check,
+                      color: Colors.white, size: 13)
                   : null,
             ),
           ],
@@ -1054,28 +987,20 @@ class _PayMethodTile extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// RECEIPT ROW
-// ─────────────────────────────────────────────
 class _ReceiptRow extends StatelessWidget {
-  final String label;
-  final String value;
+  final String label, value;
   final Color? valueColor;
-  const _ReceiptRow({
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
+  const _ReceiptRow(
+      {required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
-        ),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 12, color: Color(0xFF888888))),
         Text(
           value,
           style: TextStyle(
