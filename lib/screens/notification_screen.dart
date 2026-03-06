@@ -95,11 +95,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
           Container(
             padding: EdgeInsets.fromLTRB(16, top + 12, 16, 16),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFF8C00), Color(0xFFFFB300)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: Colors.white,
+              // gradient: LinearGradient(
+              //   colors: [Color(0xFFFF8C00), Color(0xFFFFB300)],
+              //   begin: Alignment.topLeft,
+              //   end: Alignment.bottomRight,
+              // ),
             ),
             child: Column(
               children: [
@@ -108,26 +109,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     // Back button
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
-                      child: Container(
-                        width: 34,
-                        height: 34,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
+                   
                         child: const Icon(
                           Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
-                          size: 16,
+                          color: Colors.black,
+                          size: 25,
                         ),
-                      ),
+                      
                     ),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
                         'Notifications',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.4,
@@ -142,15 +137,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.green.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                                color: Colors.white.withOpacity(0.4)),
+                                color: Colors.green.withOpacity(0.4)),
                           ),
                           child: const Text(
                             'Mark all read',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Colors.green,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -166,20 +161,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.18),
+                      color: Colors.green.withOpacity(0.18),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: Colors.white.withOpacity(0.3), width: 1),
+                          color: Colors.red.withOpacity(0.3), width: 1),
                     ),
                     child: Row(
                       children: [
                         const Icon(Icons.notifications_active,
-                            color: Colors.white, size: 16),
+                            color: Colors.red, size: 16),
                         const SizedBox(width: 8),
                         Text(
                           '$_unreadCount unread notification${_unreadCount > 1 ? 's' : ''}',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Colors.green,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),

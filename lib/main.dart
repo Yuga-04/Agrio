@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/language_support_screen.dart';
+import 'screens/notification_screen.dart';
 import 'screens/phone_entry_screen.dart';
 import 'screens/otp_screen.dart';
 import 'screens/registration_screen.dart';
@@ -99,6 +100,11 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute(
               settings: settings,
               builder: (_) => const CartScreen(),
+            ); 
+            case '/notification':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => const NotificationScreen(),
             );
 
           // Payment screen

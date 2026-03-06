@@ -206,7 +206,7 @@ class _TopBar extends StatelessWidget {
 
           // Notification bell with badge — navigates to /notifications
           GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/notifications'),
+            onTap: () => Navigator.pushNamed(context, '/notification'),
             child: Stack(
               clipBehavior: Clip.none,
               children: [
@@ -222,16 +222,6 @@ class _TopBar extends StatelessWidget {
                         color: Color(0xFFFF8C00),
                         shape: BoxShape.circle,
                       ),
-                      // child: Center(
-                      //   child: Text(
-                      //     _unreadCount > 9 ? '9+' : '$_unreadCount',
-                      //     style: const TextStyle(
-                      //       color: Colors.white,
-                      //       fontSize: 8,
-                      //       fontWeight: FontWeight.w800,
-                      //     ),
-                      //   ),
-                      // ),
                     ),
                   ),
               ],

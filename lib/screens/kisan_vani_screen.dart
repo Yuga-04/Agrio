@@ -10,8 +10,16 @@ class KisanVaniScreen extends StatefulWidget {
 class _KisanVaniScreenState extends State<KisanVaniScreen> {
   int _selectedChip = 0;
 
+  // Hard-coded unread count — replace with your state/provider later
+  static const int _unreadCount = 3;
+
   static const _chips = [
-    'All', 'Advisories', 'Schemes', 'Weather', 'Market', 'Tips',
+    'All',
+    'Advisories',
+    'Schemes',
+    'Weather',
+    'Market',
+    'Tips',
   ];
 
   @override
@@ -45,22 +53,36 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
                       Text(
                         'Farmer advisories & updates',
                         style: TextStyle(
-                            fontSize: 12, color: Color(0xFF888888)),
+                          fontSize: 12,
+                          color: Color(0xFF888888),
+                        ),
                       ),
                     ],
                   ),
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF7F7F7),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFEEEEEE)),
+                  // Notification bell with badge — navigates to /notifications
+              GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/notification'),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const _IconBtn(icon: Icons.notifications_outlined),
+                if (_unreadCount > 0)
+                  Positioned(
+                    top: 2,
+                    right: 4,
+                    child: Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFF8C00),
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                    child: const Icon(Icons.notifications_outlined,
-                        color: Color(0xFF444444), size: 18),
                   ),
-                ],
+              ],
+            ),
+          ),
+   ],
               ),
               const SizedBox(height: 14),
               // ── Featured Banner ──
@@ -103,7 +125,9 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
                           Text(
                             'Protect your crops · Avoid spraying pesticides',
                             style: TextStyle(
-                                color: Colors.white70, fontSize: 11),
+                              color: Colors.white70,
+                              fontSize: 11,
+                            ),
                           ),
                         ],
                       ),
@@ -116,8 +140,11 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
                         color: Colors.white.withOpacity(0.15),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.cloud_queue,
-                          color: Colors.white, size: 26),
+                      child: const Icon(
+                        Icons.cloud_queue,
+                        color: Colors.white,
+                        size: 26,
+                      ),
                     ),
                   ],
                 ),
@@ -146,7 +173,9 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 0),
+                      horizontal: 14,
+                      vertical: 0,
+                    ),
                     decoration: BoxDecoration(
                       color: selected
                           ? const Color(0xFF2E7D32)
@@ -265,6 +294,28 @@ class _KisanVaniScreenState extends State<KisanVaniScreen> {
 }
 
 // ─────────────────────────────────────────────
+// ICON BUTTON — matches HomeScreen exactly
+// ─────────────────────────────────────────────
+class _IconBtn extends StatelessWidget {
+  final IconData icon;
+  const _IconBtn({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F7F7),
+        shape: BoxShape.circle,
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+      ),
+      child: Icon(icon, color: const Color(0xFF444444), size: 18),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
 // VANI CARD
 // ─────────────────────────────────────────────
 class _VaniCard extends StatefulWidget {
@@ -310,8 +361,7 @@ class _VaniCardState extends State<_VaniCard> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: widget.item.tagBg,
                   borderRadius: BorderRadius.circular(6),
@@ -328,8 +378,7 @@ class _VaniCardState extends State<_VaniCard> {
               const Spacer(),
               Text(
                 widget.item.time,
-                style: const TextStyle(
-                    fontSize: 10, color: Color(0xFFAAAAAA)),
+                style: const TextStyle(fontSize: 10, color: Color(0xFFAAAAAA)),
               ),
             ],
           ),
@@ -345,8 +394,11 @@ class _VaniCardState extends State<_VaniCard> {
                   color: widget.item.tagBg,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(widget.item.icon,
-                    color: widget.item.iconColor, size: 20),
+                child: Icon(
+                  widget.item.icon,
+                  color: widget.item.iconColor,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -377,14 +429,19 @@ class _VaniCardState extends State<_VaniCard> {
           // Footer
           Row(
             children: [
-              const Icon(Icons.source_outlined,
-                  size: 13, color: Color(0xFF888888)),
+              const Icon(
+                Icons.source_outlined,
+                size: 13,
+                color: Color(0xFF888888),
+              ),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   widget.item.source,
                   style: const TextStyle(
-                      fontSize: 11, color: Color(0xFF888888)),
+                    fontSize: 11,
+                    color: Color(0xFF888888),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
