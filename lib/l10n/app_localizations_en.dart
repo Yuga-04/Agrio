@@ -178,4 +178,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get orderPlaced => 'Order Placed! 🎉';
+
+  @override
+  String get step1of3 => 'STEP 1 OF 3';
+
+  @override
+  String get step2of3 => 'STEP 2 OF 3';
+
+  @override
+  String get step3of3 => 'STEP 3 OF 3';
+
+  @override
+  String get newUser => 'New User';
+
+  @override
+  String get verified => 'Verified';
 }

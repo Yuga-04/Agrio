@@ -179,4 +179,19 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get orderPlaced => 'ஆர்டர் பதிவு செய்யப்பட்டது! 🎉';
+
+  @override
+  String get step1of3 => 'படி 1 / 3';
+
+  @override
+  String get step2of3 => 'படி 2 / 3';
+
+  @override
+  String get step3of3 => 'படி 3 / 3';
+
+  @override
+  String get newUser => 'புதிய பயனர்';
+
+  @override
+  String get verified => 'சரிபார்க்கப்பட்டது';
 }
