@@ -330,7 +330,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                                           ),
                                         ),
                                         const SizedBox(width: 6),
-                                         Text(
+                                        Text(
                                           s.step1of3,
                                           style: TextStyle(
                                             fontSize: 10,
@@ -559,29 +559,30 @@ class _PhoneField extends StatelessWidget {
                 ),
               ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _IndianFlag(),
-                const SizedBox(width: 8),
-                const Text(
-                  '+91',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A1A),
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(width: 2),
-                Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  size: 16,
-                  color: const Color(0xFF1A1A1A).withOpacity(0.4),
-                ),
-              ],
-            ),
-          ),
+       child: Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    ClipRRect(
+      borderRadius: BorderRadius.circular(3),
+      child: Image.asset(
+        "assets/india.png",
+        width: 24,
+        height: 16,
+        fit: BoxFit.cover,
+      ),
+    ),
+    const SizedBox(width: 6),
+    const Text(
+      '+91',
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF1A1A1A),
+        letterSpacing: 0.5,
+      ),
+    ),
+  ],
+),    ),
           // Number input
           Expanded(
             child: TextField(
@@ -736,7 +737,7 @@ class _TermsRow extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // INDIAN FLAG
 // ─────────────────────────────────────────────────────────────────────────────
-class _IndianFlag extends StatelessWidget {
+class IndianFlag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(

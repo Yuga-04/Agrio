@@ -18,7 +18,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get continueBtn => 'தொடர்க';
 
   @override
-  String get enterMobile => 'உங்கள்\nமொபைல் எண்ணை உள்ளிடுக';
+  String get enterMobile => 'மொபைல் எண்';
 
   @override
   String get otpSentMsg =>
@@ -55,7 +55,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get verifyOtp => 'OTP சரிபார்க்க';
 
   @override
-  String get oneTimeReg => 'ஒரு முறை\nபதிவு';
+  String get oneTimeReg => 'ஒரு முறை பதிவு';
 
   @override
   String get fillDetails => 'தொடங்க உங்கள் விவரங்களை நிரப்புக';
@@ -193,5 +193,5 @@ class AppLocalizationsTa extends AppLocalizations {
   String get newUser => 'புதிய பயனர்';
 
   @override
-  String get verified => 'சரிபார்க்கப்பட்டது';
+  String get verified => 'உறுதி';
 }
