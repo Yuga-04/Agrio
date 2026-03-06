@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
+
 
 class OrderScreen extends StatefulWidget {
   final bool showBackButton;
@@ -27,6 +29,8 @@ class _OrderScreenState extends State<OrderScreen>
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
+    final s = AppLocalizations.of(context);
+
     return Column(
       children: [
         // ── Header ──
@@ -48,19 +52,16 @@ class _OrderScreenState extends State<OrderScreen>
                     children: [
                       if (widget.showBackButton)
                         IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
-                            color: Color(0xFF1A1A1A),
-                            size: 22,
-                          ),
+                          icon: const Icon(Icons.arrow_back,
+                              color: Color(0xFF1A1A1A), size: 22),
                           onPressed: () => Navigator.of(context).pop(),
                           padding: EdgeInsets.zero,
                           visualDensity: VisualDensity.compact,
                         ),
                       if (widget.showBackButton) const SizedBox(width: 4),
-                      const Text(
-                        'My Orders',
-                        style: TextStyle(
+                      Text(
+                        s.myOrders,
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF1A1A1A),
@@ -71,20 +72,15 @@ class _OrderScreenState extends State<OrderScreen>
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
+                        horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2E7D32).withOpacity(0.08),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Row(
                       children: [
-                        Icon(
-                          Icons.filter_list,
-                          color: Color(0xFF2E7D32),
-                          size: 15,
-                        ),
+                        Icon(Icons.filter_list,
+                            color: Color(0xFF2E7D32), size: 15),
                         SizedBox(width: 4),
                         Text(
                           'Filter',
@@ -100,25 +96,20 @@ class _OrderScreenState extends State<OrderScreen>
                 ],
               ),
               const SizedBox(height: 16),
-              // ── Tab Bar ──
               TabBar(
                 controller: _tabController,
                 labelColor: const Color(0xFF2E7D32),
                 unselectedLabelColor: const Color(0xFF888888),
                 labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
+                    fontWeight: FontWeight.w700, fontSize: 13),
                 unselectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 13,
-                ),
+                    fontWeight: FontWeight.w500, fontSize: 13),
                 indicatorColor: const Color(0xFF2E7D32),
                 indicatorWeight: 2.5,
-                tabs: const [
-                  Tab(text: 'Active'),
-                  Tab(text: 'Completed'),
-                  Tab(text: 'Cancelled'),
+                tabs: [
+                  Tab(text: s.active),
+                  Tab(text: s.completed),
+                  Tab(text: s.cancelled),
                 ],
               ),
             ],
@@ -135,7 +126,7 @@ class _OrderScreenState extends State<OrderScreen>
               _OrderList(orders: _completedOrders),
               _EmptyState(
                 icon: Icons.cancel_outlined,
-                message: 'No cancelled orders',
+                message: s.cancelled,
                 subtitle: 'Cancelled orders will appear here',
               ),
             ],
@@ -260,11 +251,8 @@ class _OrderCard extends StatelessWidget {
                   color: const Color(0xFF2E7D32).withOpacity(0.07),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  order.icon,
-                  color: const Color(0xFF2E7D32),
-                  size: 22,
-                ),
+                child: Icon(order.icon,
+                    color: const Color(0xFF2E7D32), size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -283,9 +271,7 @@ class _OrderCard extends StatelessWidget {
                     Text(
                       '${order.quantity}  ·  ${order.date}',
                       style: const TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF888888),
-                      ),
+                          fontSize: 11, color: Color(0xFF888888)),
                     ),
                   ],
                 ),
@@ -317,9 +303,7 @@ class _OrderCard extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
+                    horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: order.statusBg,
                   borderRadius: BorderRadius.circular(20),
@@ -367,7 +351,8 @@ class _EmptyState extends StatelessWidget {
               color: const Color(0xFF2E7D32).withOpacity(0.07),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: const Color(0xFF2E7D32), size: 32),
+            child:
+                Icon(icon, color: const Color(0xFF2E7D32), size: 32),
           ),
           const SizedBox(height: 16),
           Text(
@@ -381,7 +366,8 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
+            style: const TextStyle(
+                fontSize: 12, color: Color(0xFF888888)),
           ),
         ],
       ),

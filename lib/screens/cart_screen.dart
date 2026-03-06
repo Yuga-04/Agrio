@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -72,9 +73,8 @@ class _CartScreenState extends State<CartScreen> {
     }
   }
 
-  void _removeItem(int id) {
-    setState(() => _items.removeWhere((e) => e.id == id));
-  }
+  void _removeItem(int id) =>
+      setState(() => _items.removeWhere((e) => e.id == id));
 
   void _changeQty(int id, int delta) {
     setState(() {
@@ -99,6 +99,7 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     final top = MediaQuery.of(context).padding.top;
     final bottom = MediaQuery.of(context).padding.bottom;
+    final s = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
@@ -116,10 +117,10 @@ class _CartScreenState extends State<CartScreen> {
                   onPressed: () => Navigator.of(context).pop(),
                 ),
                 const SizedBox(width: 2),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'My Cart',
-                    style: TextStyle(
+                    s.myCart,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF1A1A1A),
@@ -136,7 +137,8 @@ class _CartScreenState extends State<CartScreen> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFFFF3F3),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFFFFCDD2)),
+                        border:
+                            Border.all(color: const Color(0xFFFFCDD2)),
                       ),
                       child: const Text(
                         'Clear All',
@@ -156,12 +158,15 @@ class _CartScreenState extends State<CartScreen> {
           // ── Body ──
           Expanded(
             child: _items.isEmpty
-                ? _EmptyCart(onShopTap: () => Navigator.of(context).pop())
+                ? _EmptyCart(
+                    onShopTap: () => Navigator.of(context).pop(),
+                    s: s,
+                  )
                 : ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                    padding:
+                        const EdgeInsets.fromLTRB(16, 14, 16, 16),
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      // ── Item Count ──
                       Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Text(
@@ -173,25 +178,16 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                         ),
                       ),
-
-                      // ── Cart Items ──
                       ..._items.map((item) => _CartCard(
                             item: item,
                             onRemove: () => _removeItem(item.id),
                             onQtyChange: (d) => _changeQty(item.id, d),
                           )),
-
                       const SizedBox(height: 14),
-
-                      // ── Free Delivery Banner ──
                       if (_delivery > 0)
-                        _FreeDeliveryBanner(
-                            remaining: 1500 - _subtotal),
-                      if (_delivery == 0)
-                        _FreeDeliveryUnlocked(),
+                        _FreeDeliveryBanner(remaining: 1500 - _subtotal),
+                      if (_delivery == 0) _FreeDeliveryUnlocked(),
                       const SizedBox(height: 14),
-
-                      // ── Coupon ──
                       _CouponBox(
                         controller: _couponController,
                         applied: _couponApplied,
@@ -204,8 +200,6 @@ class _CartScreenState extends State<CartScreen> {
                         }),
                       ),
                       const SizedBox(height: 14),
-
-                      // ── Price Summary ──
                       _PriceSummary(
                         subtotal: _subtotal,
                         discount: _discount,
@@ -218,14 +212,15 @@ class _CartScreenState extends State<CartScreen> {
                   ),
           ),
 
-          // ── Checkout Button ──
+          // ── Checkout bar ──
           if (_items.isNotEmpty)
             Container(
               padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottom),
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: const Border(
-                    top: BorderSide(color: Color(0xFFEEEEEE), width: 1)),
+                    top: BorderSide(
+                        color: Color(0xFFEEEEEE), width: 1)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -269,7 +264,8 @@ class _CartScreenState extends State<CartScreen> {
                           arguments: {
                             'total': _total,
                             'itemCount': _items.length,
-                            'savings': _discount + (_delivery == 0 ? 60 : 0),
+                            'savings':
+                                _discount + (_delivery == 0 ? 60 : 0),
                           },
                         );
                       },
@@ -279,20 +275,20 @@ class _CartScreenState extends State<CartScreen> {
                           color: const Color(0xFF2E7D32),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Proceed to Checkout',
-                              style: TextStyle(
+                              s.checkout,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: -0.2,
                               ),
                             ),
-                            SizedBox(width: 6),
-                            Icon(Icons.arrow_forward,
+                            const SizedBox(width: 6),
+                            const Icon(Icons.arrow_forward,
                                 color: Colors.white, size: 16),
                           ],
                         ),
@@ -344,7 +340,6 @@ class _CartCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Product Icon ──
               Container(
                 width: 52,
                 height: 52,
@@ -356,31 +351,25 @@ class _CartCard extends StatelessWidget {
                     color: const Color(0xFF2E7D32), size: 24),
               ),
               const SizedBox(width: 12),
-
-              // ── Info ──
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: item.tagBg,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            item.tagLabel,
-                            style: TextStyle(
-                              color: item.tagColor,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: item.tagBg,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        item.tagLabel,
+                        style: TextStyle(
+                          color: item.tagColor,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -401,8 +390,6 @@ class _CartCard extends StatelessWidget {
                   ],
                 ),
               ),
-
-              // ── Remove ──
               GestureDetector(
                 onTap: onRemove,
                 child: Container(
@@ -411,7 +398,8 @@ class _CartCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFF3F3),
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFFFCDD2)),
+                    border:
+                        Border.all(color: const Color(0xFFFFCDD2)),
                   ),
                   child: const Icon(Icons.close,
                       color: Color(0xFFD32F2F), size: 14),
@@ -422,8 +410,6 @@ class _CartCard extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(height: 1, color: Color(0xFFF0F0F0)),
           const SizedBox(height: 10),
-
-          // ── Price + Qty ──
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -433,9 +419,7 @@ class _CartCard extends StatelessWidget {
                   Text(
                     '₹${item.price} / ${item.unit}',
                     style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF888888),
-                    ),
+                        fontSize: 11, color: Color(0xFF888888)),
                   ),
                   Text(
                     '₹${item.price * item.quantity}',
@@ -448,11 +432,10 @@ class _CartCard extends StatelessWidget {
                   ),
                 ],
               ),
-
-              // ── Quantity Stepper ──
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF2E7D32)),
+                  border:
+                      Border.all(color: const Color(0xFF2E7D32)),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -498,19 +481,14 @@ class _CartCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// QTY BUTTON
-// ─────────────────────────────────────────────
 class _QtyBtn extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
   final BorderRadius borderRadius;
-
-  const _QtyBtn({
-    required this.icon,
-    required this.onTap,
-    required this.borderRadius,
-  });
+  const _QtyBtn(
+      {required this.icon,
+      required this.onTap,
+      required this.borderRadius});
 
   @override
   Widget build(BuildContext context) {
@@ -529,9 +507,6 @@ class _QtyBtn extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// FREE DELIVERY BANNER
-// ─────────────────────────────────────────────
 class _FreeDeliveryBanner extends StatelessWidget {
   final int remaining;
   const _FreeDeliveryBanner({required this.remaining});
@@ -539,7 +514,8 @@ class _FreeDeliveryBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF8E1),
         borderRadius: BorderRadius.circular(12),
@@ -553,7 +529,8 @@ class _FreeDeliveryBanner extends StatelessWidget {
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                style: const TextStyle(
+                    fontSize: 12, color: Color(0xFF555555)),
                 children: [
                   const TextSpan(text: 'Add '),
                   TextSpan(
@@ -585,7 +562,8 @@ class _FreeDeliveryUnlocked extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFFE8F5E9),
         borderRadius: BorderRadius.circular(12),
@@ -597,7 +575,7 @@ class _FreeDeliveryUnlocked extends StatelessWidget {
               color: Color(0xFF2E7D32), size: 18),
           SizedBox(width: 8),
           Text(
-            '🎉 You\'ve unlocked Free Delivery!',
+            "🎉 You've unlocked Free Delivery!",
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -610,9 +588,6 @@ class _FreeDeliveryUnlocked extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// COUPON BOX
-// ─────────────────────────────────────────────
 class _CouponBox extends StatelessWidget {
   final TextEditingController controller;
   final bool applied;
@@ -683,7 +658,8 @@ class _CouponBox extends StatelessWidget {
                         child: TextField(
                           controller: controller,
                           enabled: !applied,
-                          textCapitalization: TextCapitalization.characters,
+                          textCapitalization:
+                              TextCapitalization.characters,
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -718,7 +694,8 @@ class _CouponBox extends StatelessWidget {
                 onTap: applied ? onRemove : onApply,
                 child: Container(
                   height: 42,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: applied
                         ? const Color(0xFFFFF3F3)
@@ -753,11 +730,9 @@ class _CouponBox extends StatelessWidget {
                 const Icon(Icons.error_outline,
                     color: Color(0xFFD32F2F), size: 13),
                 const SizedBox(width: 4),
-                Text(
-                  error,
-                  style: const TextStyle(
-                      fontSize: 11, color: Color(0xFFD32F2F)),
-                ),
+                Text(error,
+                    style: const TextStyle(
+                        fontSize: 11, color: Color(0xFFD32F2F))),
               ],
             ),
           ],
@@ -785,16 +760,9 @@ class _CouponBox extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// PRICE SUMMARY
-// ─────────────────────────────────────────────
 class _PriceSummary extends StatelessWidget {
-  final int subtotal;
-  final int discount;
-  final int delivery;
-  final int total;
+  final int subtotal, discount, delivery, total;
   final bool couponApplied;
-
   const _PriceSummary({
     required this.subtotal,
     required this.discount,
@@ -818,10 +786,9 @@ class _PriceSummary extends StatelessWidget {
           const Text(
             'Price Details',
             style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A1A),
-            ),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1A1A1A)),
           ),
           const SizedBox(height: 12),
           _SummaryRow(label: 'Subtotal', value: '₹$subtotal'),
@@ -847,10 +814,9 @@ class _PriceSummary extends StatelessWidget {
               const Text(
                 'Total Amount',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A1A),
-                ),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A1A1A)),
               ),
               Text(
                 '₹$total',
@@ -897,8 +863,7 @@ class _PriceSummary extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  final String label;
-  final String value;
+  final String label, value;
   final Color? valueColor;
   const _SummaryRow(
       {required this.label, required this.value, this.valueColor});
@@ -927,12 +892,10 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// EMPTY CART
-// ─────────────────────────────────────────────
 class _EmptyCart extends StatelessWidget {
   final VoidCallback onShopTap;
-  const _EmptyCart({required this.onShopTap});
+  final AppLocalizations s;
+  const _EmptyCart({required this.onShopTap, required this.s});
 
   @override
   Widget build(BuildContext context) {
@@ -951,9 +914,9 @@ class _EmptyCart extends StatelessWidget {
                 color: Color(0xFF2E7D32), size: 40),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Your cart is empty',
-            style: TextStyle(
+          Text(
+            s.cartEmpty,
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Color(0xFF1A1A1A),
@@ -962,7 +925,8 @@ class _EmptyCart extends StatelessWidget {
           const SizedBox(height: 6),
           const Text(
             'Add products to start your order',
-            style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+            style:
+                TextStyle(fontSize: 12, color: Color(0xFF888888)),
           ),
           const SizedBox(height: 24),
           GestureDetector(
@@ -974,9 +938,9 @@ class _EmptyCart extends StatelessWidget {
                 color: const Color(0xFF2E7D32),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Text(
-                'Shop Now',
-                style: TextStyle(
+              child: Text(
+                s.shopNow,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,

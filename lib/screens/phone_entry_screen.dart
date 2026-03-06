@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:agrio/l10n/app_localizations.dart';
 
 class PhoneEntryScreen extends StatefulWidget {
   const PhoneEntryScreen({super.key});
@@ -15,8 +16,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
   final ScrollController _scrollController = ScrollController();
   bool _isFocused = false;
   bool _hasText = false;
-
-  Map<String, String>? _language;
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -47,9 +46,10 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
         Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
           CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
         );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
     );
@@ -65,23 +65,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map) {
-      if (args.containsKey('code')) {
-        _language = args.map((k, v) => MapEntry(k.toString(), v.toString()));
-      } else if (args.containsKey('language')) {
-        final langRaw = args['language'];
-        if (langRaw is Map) {
-          _language =
-              langRaw.map((k, v) => MapEntry(k.toString(), v.toString()));
-        }
-      }
-    }
-  }
-
-  @override
   void dispose() {
     _slideController.dispose();
     _fadeController.dispose();
@@ -91,7 +74,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
     super.dispose();
   }
 
-  // Scroll down to reveal input when keyboard opens
   void _onFocusChange(bool focused) {
     setState(() => _isFocused = focused);
     if (focused) {
@@ -110,20 +92,19 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final s = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
-      // ✅ true: scaffold shrinks body so keyboard doesn't cover content
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         controller: _scrollController,
         physics: const ClampingScrollPhysics(),
         child: ConstrainedBox(
-          // Minimum height = full screen so image still fills on open
           constraints: BoxConstraints(minHeight: size.height),
           child: Column(
             children: [
-              // ── Image section — shrinks proportionally when keyboard open ──
+              // ── Image section ──
               SizedBox(
                 height: size.height * 0.52,
                 width: double.infinity,
@@ -135,7 +116,6 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                       fit: BoxFit.cover,
                       alignment: const Alignment(0, -0.2),
                     ),
-                    // Bottom gradient
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -151,13 +131,14 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                         ),
                       ),
                     ),
-                    // Back button
                     Positioned(
                       top: 48,
                       left: 16,
                       child: GestureDetector(
-                        onTap: () =>
-                            Navigator.pushReplacementNamed(context, '/language'),
+                        onTap: () => Navigator.pushReplacementNamed(
+                          context,
+                          '/language',
+                        ),
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -176,7 +157,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                 ),
               ),
 
-              // ── White card section ──
+              // ── White card ──
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: SlideTransition(
@@ -190,10 +171,9 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 20),
-
-                        const Text(
-                          'Enter your\nmobile number',
-                          style: TextStyle(
+                        Text(
+                          s.enterMobile,
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF1A1A1A),
@@ -202,15 +182,14 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'We\'ll send you a verification code',
-                          style: TextStyle(
+                        Text(
+                          s.otpSentMsg,
+                          style: const TextStyle(
                             fontSize: 13,
                             color: Color(0xFF888888),
                             fontWeight: FontWeight.w400,
                           ),
                         ),
-
                         const SizedBox(height: 18),
 
                         // ── Phone input ──
@@ -268,7 +247,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                                   child: TextField(
                                     controller: _phoneController,
                                     keyboardType: TextInputType.phone,
-                                    maxLength: 10,
+                                    maxLength: 10, // ✅ correct
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly,
                                     ],
@@ -299,8 +278,9 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                                 duration: const Duration(milliseconds: 200),
                                 child: _hasText
                                     ? Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 14),
+                                        padding: const EdgeInsets.only(
+                                          right: 14,
+                                        ),
                                         child: Container(
                                           key: const ValueKey('check'),
                                           padding: const EdgeInsets.all(4),
@@ -347,33 +327,36 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                                   ),
                                 ),
                                 child: _agreeToTerms
-                                    ? const Icon(Icons.check,
-                                        size: 13, color: Colors.white)
+                                    ? const Icon(
+                                        Icons.check,
+                                        size: 13,
+                                        color: Colors.white,
+                                      )
                                     : null,
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: RichText(
-                                  text: const TextSpan(
-                                    style: TextStyle(
+                                  text: TextSpan(
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       color: Color(0xFF666666),
                                       height: 1.4,
                                     ),
                                     children: [
-                                      TextSpan(text: 'I agree to the '),
+                                      TextSpan(text: s.agreeTerms),
                                       TextSpan(
-                                        text: 'Terms & Conditions',
-                                        style: TextStyle(
+                                        text: s.termsLink,
+                                        style: const TextStyle(
                                           color: Color(0xFF2E7D32),
                                           fontWeight: FontWeight.w600,
                                           decoration: TextDecoration.underline,
                                         ),
                                       ),
-                                      TextSpan(text: ' and '),
+                                      TextSpan(text: s.and),
                                       TextSpan(
-                                        text: 'Privacy Policy',
-                                        style: TextStyle(
+                                        text: s.privacyPolicy,
+                                        style: const TextStyle(
                                           color: Color(0xFF2E7D32),
                                           fontWeight: FontWeight.w600,
                                           decoration: TextDecoration.underline,
@@ -389,20 +372,19 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
 
                         const SizedBox(height: 20),
 
-                        // ── GET OTP Button ──
+                        // ── GET OTP button ──
                         GestureDetector(
                           onTapDown: (_) => _buttonController.forward(),
                           onTapUp: (_) => _buttonController.reverse(),
                           onTapCancel: () => _buttonController.reverse(),
                           onTap: (_agreeToTerms && _hasText)
                               ? () => Navigator.pushNamed(
-                                    context,
-                                    '/otp',
-                                    arguments: {
-                                      'phone': '+91 ${_phoneController.text}',
-                                      'language': _language,
-                                    },
-                                  )
+                                  context,
+                                  '/otp',
+                                  arguments: {
+                                    'phone': '+91 ${_phoneController.text}',
+                                  },
+                                )
                               : null,
                           child: ScaleTransition(
                             scale: _buttonScaleAnimation,
@@ -427,7 +409,7 @@ class _PhoneEntryScreenState extends State<PhoneEntryScreen>
                                       ? Colors.white
                                       : const Color(0xFFAAAAAA),
                                 ),
-                                child: const Text('GET OTP'),
+                                child: Text(s.getOtp),
                               ),
                             ),
                           ),

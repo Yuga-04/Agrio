@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:agrio/l10n/app_localizations.dart';
+import 'package:agrio/l10n/locale_provider.dart';
 
 class LanguageSupportScreen extends StatefulWidget {
   const LanguageSupportScreen({super.key});
@@ -9,7 +11,7 @@ class LanguageSupportScreen extends StatefulWidget {
 
 class _LanguageSupportScreenState extends State<LanguageSupportScreen>
     with TickerProviderStateMixin {
-  String? _selectedLanguage;
+  AppLocale? _selected;
 
   late AnimationController _slideController;
   late AnimationController _fadeController;
@@ -19,11 +21,7 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _buttonScaleAnimation;
 
-  final List<Map<String, String>> _languages = [
-    {'code': 'en', 'name': 'English', 'native': 'English'},
-    {'code': 'hi', 'name': 'Hindi', 'native': 'हिन्दी'},
-    {'code': 'ta', 'name': 'Tamil', 'native': 'தமிழ்'},
-  ];
+  bool _changeOnly = false;
 
   @override
   void initState() {
@@ -59,6 +57,17 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Pre-select the currently active locale when coming back from drawer
+    _selected ??= AppLocale.fromLocale(Localizations.localeOf(context));
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args is Map) {
+      _changeOnly = (args['changeOnly'] as bool?) ?? false;
+    }
+  }
+
+  @override
   void dispose() {
     _slideController.dispose();
     _fadeController.dispose();
@@ -66,14 +75,23 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
     super.dispose();
   }
 
-  /// Returns the full language map for the currently selected language code.
-  Map<String, String>? get _selectedLangMap => _selectedLanguage == null
-      ? null
-      : _languages.firstWhere((l) => l['code'] == _selectedLanguage);
+  void _onContinue() {
+    if (_selected == null) return;
+    localeNotifier.setLocale(_selected!);
+
+    if (_changeOnly) {
+      Navigator.pop(context); // just go back — no login flow
+    } else {
+      Navigator.pushNamed(context, '/phone');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    // Read current strings so the screen itself can be translated
+    // (useful when coming back via "Change Language" in the drawer)
+    final s = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -122,7 +140,7 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
             ),
           ),
 
-          // ── White card section ──
+          // ── Content section ──
           Flexible(
             flex: 45,
             child: FadeTransition(
@@ -141,9 +159,9 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const SizedBox(height: 50),
-                      const Text(
-                        'Select your language',
-                        style: TextStyle(
+                      Text(
+                        s.selectLanguage,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF1A1A1A),
@@ -152,9 +170,9 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                         ),
                       ),
                       const SizedBox(height: 3),
-                      const Text(
-                        'You can change this later in settings',
-                        style: TextStyle(
+                      Text(
+                        s.changeLanguageLater,
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF888888),
                           fontWeight: FontWeight.w400,
@@ -162,26 +180,25 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                       ),
                       const SizedBox(height: 25),
 
-                      // Language tiles
+                      // ── Language tiles ──
                       IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _languages.asMap().entries.map((entry) {
+                          children: AppLocale.all.asMap().entries.map((entry) {
                             final index = entry.key;
                             final lang = entry.value;
-                            final isSelected =
-                                _selectedLanguage == lang['code'];
+                            final isSelected = _selected == lang;
                             return Expanded(
                               child: Padding(
                                 padding: EdgeInsets.only(
-                                  right: index < _languages.length - 1 ? 10 : 0,
+                                  right: index < AppLocale.all.length - 1
+                                      ? 10
+                                      : 0,
                                 ),
                                 child: _LanguageTile(
-                                  language: lang,
+                                  locale: lang,
                                   isSelected: isSelected,
-                                  onTap: () => setState(
-                                    () => _selectedLanguage = lang['code'],
-                                  ),
+                                  onTap: () => setState(() => _selected = lang),
                                 ),
                               ),
                             );
@@ -191,20 +208,12 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
 
                       const SizedBox(height: 50),
 
-                      // CONTINUE — passes language map directly as arguments.
-                      // PhoneEntryScreen receives it as: args is Map
+                      // ── CONTINUE button ──
                       GestureDetector(
                         onTapDown: (_) => _buttonController.forward(),
                         onTapUp: (_) => _buttonController.reverse(),
                         onTapCancel: () => _buttonController.reverse(),
-                        onTap: _selectedLanguage != null
-                            ? () => Navigator.pushNamed(
-                                context,
-                                '/phone',
-                                arguments:
-                                    _selectedLangMap, // Map<String,String>
-                              )
-                            : null,
+                        onTap: _selected != null ? _onContinue : null,
                         child: ScaleTransition(
                           scale: _buttonScaleAnimation,
                           child: AnimatedContainer(
@@ -212,7 +221,7 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                             width: double.infinity,
                             height: 52,
                             decoration: BoxDecoration(
-                              color: _selectedLanguage != null
+                              color: _selected != null
                                   ? const Color(0xFF2E7D32)
                                   : const Color(0xFFE0E0E0),
                               borderRadius: BorderRadius.circular(14),
@@ -224,11 +233,11 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 1.2,
-                                color: _selectedLanguage != null
+                                color: _selected != null
                                     ? Colors.white
                                     : const Color(0xFFAAAAAA),
                               ),
-                              child: const Text('CONTINUE'),
+                              child: Text(s.continueBtn),
                             ),
                           ),
                         ),
@@ -245,13 +254,16 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
   }
 }
 
+// ─────────────────────────────────────────────
+// LANGUAGE TILE
+// ─────────────────────────────────────────────
 class _LanguageTile extends StatelessWidget {
-  final Map<String, String> language;
+  final AppLocale locale;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _LanguageTile({
-    required this.language,
+    required this.locale,
     required this.isSelected,
     required this.onTap,
   });
@@ -310,7 +322,7 @@ class _LanguageTile extends StatelessWidget {
                     : const Color(0xFF1A1A1A),
               ),
               child: Text(
-                language['native']!,
+                locale.native,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
@@ -328,7 +340,7 @@ class _LanguageTile extends StatelessWidget {
                     : const Color(0xFF888888),
               ),
               child: Text(
-                language['name']!,
+                locale.name,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
