@@ -4,6 +4,7 @@ import 'package:agrio/l10n/app_localizations.dart';
 
 import 'l10n/locale_provider.dart';
 import 'screens/language_support_screen.dart';
+import 'screens/language_change_screen.dart';
 import 'screens/notification_screen.dart';
 import 'screens/phone_entry_screen.dart';
 import 'screens/otp_screen.dart';
@@ -14,9 +15,12 @@ import 'screens/kisan_vani_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/payment_screen.dart';
 
+// A global navigator key so the navigator instance survives locale rebuilds.
+final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await localeNotifier.load();   // restore saved language
+  await localeNotifier.load();
   runApp(const MyApp());
 }
 
@@ -25,6 +29,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ValueListenableBuilder only rebuilds the MaterialApp's locale/delegates,
+    // NOT the navigator, because we pass a fixed navigatorKey.
     return ValueListenableBuilder<Locale>(
       valueListenable: localeNotifier,
       builder: (context, locale, _) {
@@ -32,13 +38,12 @@ class MyApp extends StatelessWidget {
           title: 'Agrio',
           debugShowCheckedModeBanner: false,
 
-          // ── Localization setup ─────────────────────────────
+          // ── Keep the same navigator across locale rebuilds ──
+          navigatorKey: _navigatorKey,
+
+          // ── Localization setup ──────────────────────────────
           locale: locale,
-          supportedLocales: const [
-            Locale('en'),
-            Locale('hi'),
-            Locale('ta'),
-          ],
+          supportedLocales: const [Locale('en'), Locale('hi'), Locale('ta')],
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
@@ -52,6 +57,11 @@ class MyApp extends StatelessWidget {
               case '/language':
                 return MaterialPageRoute(
                   builder: (_) => const LanguageSupportScreen(),
+                );
+              // ── New dedicated route: only switches locale, pops back ──
+              case '/language-change':
+                return MaterialPageRoute(
+                  builder: (_) => const LanguageChangeScreen(),
                 );
               case '/phone':
                 return MaterialPageRoute(
@@ -94,9 +104,7 @@ class MyApp extends StatelessWidget {
                   ),
                 );
               case '/cart':
-                return MaterialPageRoute(
-                  builder: (_) => const CartScreen(),
-                );
+                return MaterialPageRoute(builder: (_) => const CartScreen());
               case '/notification':
                 return MaterialPageRoute(
                   builder: (_) => const NotificationScreen(),

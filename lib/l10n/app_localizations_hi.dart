@@ -178,4 +178,19 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get orderPlaced => 'ऑर्डर दिया गया! 🎉';
+
+  @override
+  String get step1of3 => 'चरण 1 / 3';
+
+  @override
+  String get step2of3 => 'चरण 2 / 3';
+
+  @override
+  String get step3of3 => 'चरण 3 / 3';
+
+  @override
+  String get newUser => 'नया उपयोगकर्ता';
+
+  @override
+  String get verified => 'सत्यापित';
 }

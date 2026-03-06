@@ -50,15 +50,19 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/orders');
             },
           ),
-          // ── Change Language — navigates to language screen ──
+
+          // ── Change Language — navigates to dedicated language-change screen ──
           _DrawerItem(
             icon: Icons.language_outlined,
             label: s.changeLanguage,
             onTap: () {
               Navigator.pop(context);
-              Navigator.pushNamed(context, '/language', arguments: {'changeOnly': true});
+              // '/language-change' is the new dedicated route that ONLY switches
+              // the locale and pops back — it never pushes to /phone or /otp.
+              Navigator.pushNamed(context, '/language-change');
             },
           ),
+
           _DrawerItem(
             icon: Icons.star_outline,
             label: s.rateUs,

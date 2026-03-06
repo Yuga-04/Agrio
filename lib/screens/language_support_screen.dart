@@ -13,64 +13,151 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
     with TickerProviderStateMixin {
   AppLocale? _selected;
 
-  late AnimationController _slideController;
-  late AnimationController _fadeController;
+  late AnimationController _heroController;
+  late AnimationController _cardController;
+  late AnimationController _staggerController;
   late AnimationController _buttonController;
 
-  late Animation<Offset> _slideAnimation;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _buttonScaleAnimation;
-
-  bool _changeOnly = false;
+  late Animation<double> _heroScale;
+  late Animation<double> _heroFade;
+  late Animation<Offset> _cardSlide;
+  late Animation<double> _cardFade;
+  late Animation<double> _titleFade;
+  late Animation<Offset> _titleSlide;
+  late Animation<double> _subtitleFade;
+  late Animation<Offset> _subtitleSlide;
+  late Animation<double> _tilesFade;
+  late Animation<Offset> _tilesSlide;
+  late Animation<double> _buttonFade;
+  late Animation<Offset> _buttonSlide;
+  late Animation<double> _buttonScale;
 
   @override
   void initState() {
     super.initState();
 
-    _slideController = AnimationController(
+    _heroController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 900),
     );
-    _fadeController = AnimationController(
+    _cardController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 750),
+    );
+    _staggerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
     _buttonController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 150),
+      duration: const Duration(milliseconds: 130),
     );
 
-    _slideAnimation =
-        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
-          CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+    // Hero: zoom-in + fade (same as phone/OTP)
+    _heroScale = Tween<double>(begin: 1.08, end: 1.0).animate(
+      CurvedAnimation(parent: _heroController, curve: Curves.easeOutCubic),
+    );
+    _heroFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _heroController,
+        curve: const Interval(0, 0.5, curve: Curves.easeOut),
+      ),
+    );
+
+    // Card: rises from below
+    _cardSlide = Tween<Offset>(begin: const Offset(0, 0.18), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _cardController, curve: Curves.easeOutQuart),
         );
-    _fadeAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
-    _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+    _cardFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _cardController,
+        curve: const Interval(0, 0.5, curve: Curves.easeOut),
+      ),
+    );
+
+    // Staggered content
+    _titleFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _staggerController,
+        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+      ),
+    );
+    _titleSlide = Tween<Offset>(begin: const Offset(0, 0.35), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _staggerController,
+            curve: const Interval(0.0, 0.45, curve: Curves.easeOutCubic),
+          ),
+        );
+
+    _subtitleFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _staggerController,
+        curve: const Interval(0.1, 0.5, curve: Curves.easeOut),
+      ),
+    );
+    _subtitleSlide =
+        Tween<Offset>(begin: const Offset(0, 0.35), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _staggerController,
+            curve: const Interval(0.1, 0.55, curve: Curves.easeOutCubic),
+          ),
+        );
+
+    _tilesFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _staggerController,
+        curve: const Interval(0.25, 0.65, curve: Curves.easeOut),
+      ),
+    );
+    _tilesSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _staggerController,
+            curve: const Interval(0.25, 0.70, curve: Curves.easeOutCubic),
+          ),
+        );
+
+    _buttonFade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _staggerController,
+        curve: const Interval(0.45, 0.85, curve: Curves.easeOut),
+      ),
+    );
+    _buttonSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _staggerController,
+            curve: const Interval(0.45, 0.90, curve: Curves.easeOutCubic),
+          ),
+        );
+
+    _buttonScale = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _buttonController, curve: Curves.easeInOut),
     );
 
-    _slideController.forward();
-    _fadeController.forward();
+    // Same staggered launch as phone/OTP screens
+    _heroController.forward();
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _cardController.forward();
+    });
+    Future.delayed(const Duration(milliseconds: 380), () {
+      if (mounted) _staggerController.forward();
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Pre-select the currently active locale when coming back from drawer
     _selected ??= AppLocale.fromLocale(Localizations.localeOf(context));
-    final args = ModalRoute.of(context)?.settings.arguments;
-    if (args is Map) {
-      _changeOnly = (args['changeOnly'] as bool?) ?? false;
-    }
   }
 
   @override
   void dispose() {
-    _slideController.dispose();
-    _fadeController.dispose();
+    _heroController.dispose();
+    _cardController.dispose();
+    _staggerController.dispose();
     _buttonController.dispose();
     super.dispose();
   }
@@ -78,171 +165,214 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
   void _onContinue() {
     if (_selected == null) return;
     localeNotifier.setLocale(_selected!);
-
-    if (_changeOnly) {
-      Navigator.pop(context); // just go back — no login flow
-    } else {
-      Navigator.pushNamed(context, '/phone');
-    }
+    Navigator.pushNamed(context, '/phone');
   }
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-    // Read current strings so the screen itself can be translated
-    // (useful when coming back via "Change Language" in the drawer)
+    final size = MediaQuery.of(context).size;
+    final botPad = MediaQuery.of(context).padding.bottom;
     final s = AppLocalizations.of(context);
+
+    // Same proportions as phone/OTP: ~50% image
+    final double imageHeight = size.height * 0.52;
 
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Image section ──
-          Flexible(
-            flex: 55,
-            child: SizedBox(
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset(
-                    'assets/farmer_holding_phone.png',
-                    fit: BoxFit.cover,
-                    alignment: const Alignment(0, -0.2),
-                  ),
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Color(0x22000000)],
-                      ),
+          // ── Hero image (same pattern as phone/OTP screens) ────────────
+          SizedBox(
+            height: imageHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                FadeTransition(
+                  opacity: _heroFade,
+                  child: ScaleTransition(
+                    scale: _heroScale,
+                    child: Image.asset(
+                      'assets/farmer_holding_phone.png',
+                      fit: BoxFit.cover,
+                      alignment: const Alignment(0, -0.2),
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 80,
-                    child: Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.white],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
 
-          // ── Content section ──
-          Flexible(
-            flex: 45,
+          // ── Card: overlaps image by 32px via Transform.translate ──────
+          Expanded(
             child: FadeTransition(
-              opacity: _fadeAnimation,
+              opacity: _cardFade,
               child: SlideTransition(
-                position: _slideAnimation,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    24,
-                    8,
-                    24,
-                    bottomPadding > 0 ? bottomPadding + 8 : 20,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const SizedBox(height: 50),
-                      Text(
-                        s.selectLanguage,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A1A),
-                          height: 1.25,
-                          letterSpacing: -0.5,
-                        ),
+                position: _cardSlide,
+                child: Transform.translate(
+                  offset: const Offset(0, -32),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(32),
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        s.changeLanguageLater,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF888888),
-                          fontWeight: FontWeight.w400,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(0x14000000),
+                          blurRadius: 32,
+                          offset: Offset(0, -8),
                         ),
-                      ),
-                      const SizedBox(height: 25),
-
-                      // ── Language tiles ──
-                      IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: AppLocale.all.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final lang = entry.value;
-                            final isSelected = _selected == lang;
-                            return Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                  right: index < AppLocale.all.length - 1
-                                      ? 10
-                                      : 0,
-                                ),
-                                child: _LanguageTile(
-                                  locale: lang,
-                                  isSelected: isSelected,
-                                  onTap: () => setState(() => _selected = lang),
-                                ),
+                      ],
+                    ),
+                    padding: EdgeInsets.fromLTRB(28, 32, 28, botPad + 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Title ──
+                        FadeTransition(
+                          opacity: _titleFade,
+                          child: SlideTransition(
+                            position: _titleSlide,
+                            child: Text(
+                              s.selectLanguage,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF1A1A1A),
+                                height: 1.15,
+                                letterSpacing: -0.8,
                               ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-
-                      const SizedBox(height: 50),
-
-                      // ── CONTINUE button ──
-                      GestureDetector(
-                        onTapDown: (_) => _buttonController.forward(),
-                        onTapUp: (_) => _buttonController.reverse(),
-                        onTapCancel: () => _buttonController.reverse(),
-                        onTap: _selected != null ? _onContinue : null,
-                        child: ScaleTransition(
-                          scale: _buttonScaleAnimation,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            width: double.infinity,
-                            height: 52,
-                            decoration: BoxDecoration(
-                              color: _selected != null
-                                  ? const Color(0xFF2E7D32)
-                                  : const Color(0xFFE0E0E0),
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            alignment: Alignment.center,
-                            child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 250),
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.2,
-                                color: _selected != null
-                                    ? Colors.white
-                                    : const Color(0xFFAAAAAA),
-                              ),
-                              child: Text(s.continueBtn),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+
+                        const SizedBox(height: 6),
+
+                        // ── Subtitle ──
+                        FadeTransition(
+                          opacity: _subtitleFade,
+                          child: SlideTransition(
+                            position: _subtitleSlide,
+                            child: Text(
+                              s.changeLanguageLater,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF999999),
+                                fontWeight: FontWeight.w400,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 32),
+
+                        // ── Language tiles ──
+                        FadeTransition(
+                          opacity: _tilesFade,
+                          child: SlideTransition(
+                            position: _tilesSlide,
+                            child: IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: AppLocale.all.asMap().entries.map((
+                                  entry,
+                                ) {
+                                  final index = entry.key;
+                                  final lang = entry.value;
+                                  final isSelected = _selected == lang;
+                                  return Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        right: index < AppLocale.all.length - 1
+                                            ? 12
+                                            : 0,
+                                      ),
+                                      child: _LanguageTile(
+                                        locale: lang,
+                                        isSelected: isSelected,
+                                        onTap: () =>
+                                            setState(() => _selected = lang),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        // ── Continue button ──
+                        FadeTransition(
+                          opacity: _buttonFade,
+                          child: SlideTransition(
+                            position: _buttonSlide,
+                            child: GestureDetector(
+                              onTapDown: (_) => _buttonController.forward(),
+                              onTapUp: (_) => _buttonController.reverse(),
+                              onTapCancel: () => _buttonController.reverse(),
+                              onTap: _selected != null ? _onContinue : null,
+                              child: ScaleTransition(
+                                scale: _buttonScale,
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 280),
+                                  width: double.infinity,
+                                  height: 56,
+                                  decoration: BoxDecoration(
+                                    color: _selected != null
+                                        ? const Color(0xFF2E7D32)
+                                        : const Color(0xFFEEEEEE),
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: _selected != null
+                                        ? [
+                                            BoxShadow(
+                                              color: const Color(
+                                                0xFF2E7D32,
+                                              ).withOpacity(0.35),
+                                              blurRadius: 18,
+                                              offset: const Offset(0, 6),
+                                            ),
+                                          ]
+                                        : [],
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      AnimatedDefaultTextStyle(
+                                        duration: const Duration(
+                                          milliseconds: 280,
+                                        ),
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.8,
+                                          color: _selected != null
+                                              ? Colors.white
+                                              : const Color(0xFFBBBBBB),
+                                        ),
+                                        child: Text(s.continueBtn),
+                                      ),
+                                      if (_selected != null) ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -254,9 +384,9 @@ class _LanguageSupportScreenState extends State<LanguageSupportScreen>
   }
 }
 
-// ─────────────────────────────────────────────
-// LANGUAGE TILE
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// LANGUAGE TILE — same style as language_change_screen
+// ─────────────────────────────────────────────────────────────────────────────
 class _LanguageTile extends StatelessWidget {
   final AppLocale locale;
   final bool isSelected;
@@ -275,25 +405,35 @@ class _LanguageTile extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFF2E7D32).withOpacity(0.07)
-              : const Color(0xFFF7F7F7),
-          borderRadius: BorderRadius.circular(14),
+              : const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? const Color(0xFF2E7D32) : Colors.transparent,
             width: 1.5,
           ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF2E7D32).withOpacity(0.10),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Radio circle
             AnimatedContainer(
               duration: const Duration(milliseconds: 220),
-              width: 20,
-              height: 20,
+              width: 22,
+              height: 22,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
@@ -307,10 +447,15 @@ class _LanguageTile extends StatelessWidget {
                     : Colors.transparent,
               ),
               child: isSelected
-                  ? const Icon(Icons.check, size: 12, color: Colors.white)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      size: 13,
+                      color: Colors.white,
+                    )
                   : null,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
+            // Native name
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: TextStyle(
@@ -328,7 +473,8 @@ class _LanguageTile extends StatelessWidget {
                 maxLines: 2,
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 3),
+            // English name
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: TextStyle(

@@ -441,6 +441,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Order Placed! 🎉'**
   String get orderPlaced;
+
+  /// No description provided for @step1of3.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP 1 OF 3'**
+  String get step1of3;
+
+  /// No description provided for @step2of3.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP 2 OF 3'**
+  String get step2of3;
+
+  /// No description provided for @step3of3.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP 3 OF 3'**
+  String get step3of3;
+
+  /// No description provided for @newUser.
+  ///
+  /// In en, this message translates to:
+  /// **'New User'**
+  String get newUser;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
 }
 
 class _AppLocalizationsDelegate
